@@ -31,8 +31,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 .no-scroll { overflow: hidden; }
 .toast-enter { transform: translateX(-50%) translateY(0); opacity: 1; }
 /* Landing */
-.budget-opt.selected, .vibe-opt.selected { border-color: #4bee2b !important; background: rgba(75,238,43,0.18) !important; color: #4bee2b !important; }
+.vibe-opt.selected, .leftover-toggle.selected { border-color: #4bee2b !important; background: rgba(75,238,43,0.18) !important; color: #4bee2b !important; }
 .landing-pref-chip.selected { border-color: #4bee2b !important; background: rgba(75,238,43,0.18) !important; color: #4bee2b !important; }
+/* Budget slider */
+.budget-slider { -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:2px; outline:none; cursor:pointer; background: linear-gradient(to right, #4bee2b 0%, #4bee2b var(--pct,66.6%), #cbd5e1 var(--pct,66.6%), #cbd5e1 100%); }
+.budget-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:18px; height:18px; border-radius:50%; background:#4bee2b; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer; }
+.budget-slider::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#4bee2b; border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.25); cursor:pointer; border:none; }
 .tag-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; background:#e8fde2; border:1.5px solid #4bee2b; border-radius:20px; font-size:12px; font-weight:600; color:#132210; }
 /* Drag & drop */
 .drop-target { outline: 2.5px dashed #4bee2b; outline-offset: -2px; background: #e8fde2 !important; }
@@ -108,35 +112,45 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
             </div>
 
             <!-- ── Settings row (budget · vibe · diet) ── -->
-            <div class="w-full max-w-2xl flex flex-col gap-3">
+            <div class="w-full max-w-2xl flex flex-col gap-4">
 
-              <!-- Budget + Vibe on one row -->
-              <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                <div class="flex items-center gap-2">
+              <!-- Budget slider -->
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
                   <span class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Budget</span>
-                  <div class="flex gap-1.5">
-                    <button class="budget-opt h-8 px-3 rounded-full text-xs font-semibold border transition-all border-slate-600 text-slate-400 hover:border-primary hover:text-primary"
-                      data-budget="low" onclick="selectBudget(this,'low')">💰 Budget</button>
-                    <button class="budget-opt selected h-8 px-3 rounded-full text-xs font-semibold border transition-all"
-                      data-budget="medium" onclick="selectBudget(this,'medium')">💵 Moderate</button>
-                    <button class="budget-opt h-8 px-3 rounded-full text-xs font-semibold border transition-all border-slate-600 text-slate-400 hover:border-primary hover:text-primary"
-                      data-budget="high" onclick="selectBudget(this,'high')">💎 Generous</button>
-                  </div>
+                  <span id="budget-label" class="text-xs font-semibold text-primary">Moderate</span>
                 </div>
+                <input type="range" id="budget-slider" min="0" max="3" step="1" value="2"
+                  class="budget-slider" style="--pct:66.6%" oninput="onBudgetSlide(this)">
+                <div class="flex justify-between text-[10px] text-slate-400 font-medium px-0.5 select-none">
+                  <span>Tight budget</span>
+                  <span>Keep it cheap</span>
+                  <span>Moderate</span>
+                  <span>Push the boat out</span>
+                </div>
+              </div>
+
+              <!-- Vibe + Smart Leftovers -->
+              <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
                 <div class="flex items-center gap-2">
                   <span class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Vibe</span>
                   <div class="flex gap-1.5">
                     <button class="vibe-opt selected h-8 px-3 rounded-full text-xs font-semibold border transition-all"
-                      data-vibe="love" onclick="selectVibe(this,'love')">🍳 Love it</button>
+                      data-vibe="quick" onclick="selectVibe(this,'quick')">⚡ Quick and easy</button>
                     <button class="vibe-opt h-8 px-3 rounded-full text-xs font-semibold border transition-all border-slate-600 text-slate-400 hover:border-primary hover:text-primary"
-                      data-vibe="quick" onclick="selectVibe(this,'quick')">⚡ Quick</button>
+                      data-vibe="batch" onclick="selectVibe(this,'batch')">📦 Batch cooking</button>
                     <button class="vibe-opt h-8 px-3 rounded-full text-xs font-semibold border transition-all border-slate-600 text-slate-400 hover:border-primary hover:text-primary"
-                      data-vibe="minimal" onclick="selectVibe(this,'minimal')">📦 Batch &amp; Leftovers</button>
+                      data-vibe="fancy" onclick="selectVibe(this,'fancy')">✨ Feeling fancy</button>
                   </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-500 text-[11px] font-bold uppercase tracking-wider">Smart Leftovers</span>
+                  <button id="leftovers-toggle" class="leftover-toggle h-8 px-3 rounded-full text-xs font-semibold border transition-all border-slate-600 text-slate-400 hover:border-primary hover:text-primary"
+                    onclick="toggleLeftoversHint()">🍱 Off</button>
                 </div>
               </div>
 
-              <!-- Leftover hint (shown when low budget or batch vibe) -->
+              <!-- Leftover hint (shown when toggle is on) -->
               <div id="leftover-hint" class="hidden bg-amber-900/40 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center gap-2">
                 <span class="ms text-amber-400 text-[18px] flex-shrink-0">info</span>
                 <p class="text-xs text-amber-200 leading-relaxed"><strong>Smart leftovers on:</strong> We'll batch-cook 2–3 recipes and schedule them across multiple days — fewer ingredients, less cooking.</p>
@@ -765,7 +779,7 @@ var RECIPES = [
 var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 var MEAL_TYPES = ['lunch','dinner'];
 
-var st = { servings:2, activeFilter:'all', prefs:[], plan:{}, favourites:[], checked:{}, budget:'medium', vibe:'love', myIngredients:[], leftovers:{} };
+var st = { servings:2, activeFilter:'all', prefs:[], plan:{}, favourites:[], checked:{}, budget:'moderate', vibe:'quick', leftoversOn:false, myIngredients:[], leftovers:{} };
 var openRecipeId = null;
 
 try { var _s = localStorage.getItem('chefly_v4'); if(_s) Object.assign(st, JSON.parse(_s)); } catch(e){}
@@ -778,16 +792,14 @@ function totalTime(r){ return r.cook+r.prep; }
 // ─── LANDING PAGE ────────────────────────────────────────────────────────────
 var COMMON_INGS = ['chicken','beef','pork','lamb','salmon','tuna','prawns','eggs','milk','butter','cream','cheese','pasta','rice','noodles','tomatoes','onion','garlic','potatoes','carrots','spinach','peppers','courgette','broccoli','cauliflower','mushrooms','lemon','lime','ginger','coriander','parsley','basil','chilli','avocado','beans','chickpeas','lentils','flour','bread','olive oil','soy sauce','coconut milk'];
 
-function selectBudget(btn, val){
-  st.budget = val;
-  document.querySelectorAll('.budget-opt').forEach(function(b){
-    b.classList.remove('selected');
-    b.classList.add('border-slate-600','text-slate-400');
-    b.classList.remove('border-primary','text-primary');
-  });
-  btn.classList.add('selected');
-  btn.classList.remove('border-slate-600','text-slate-400');
-  updateLeftoverHint();
+var BUDGET_LABELS = ['Tight budget','Keep it cheap','Moderate','Push the boat out'];
+var BUDGET_VALS   = ['tight','cheap','moderate','splurge'];
+function onBudgetSlide(el){
+  var idx = parseInt(el.value);
+  st.budget = BUDGET_VALS[idx];
+  var lbl = document.getElementById('budget-label');
+  if(lbl) lbl.textContent = BUDGET_LABELS[idx];
+  el.style.setProperty('--pct', (idx/3*100).toFixed(1)+'%');
 }
 function selectVibe(btn, val){
   st.vibe = val;
@@ -798,12 +810,18 @@ function selectVibe(btn, val){
   });
   btn.classList.add('selected');
   btn.classList.remove('border-slate-600','text-slate-400');
-  updateLeftoverHint();
 }
-function updateLeftoverHint(){
-  var show = (st.budget==='low' || st.vibe==='minimal');
-  var el = document.getElementById('leftover-hint');
-  if(el) el.classList.toggle('hidden', !show);
+function toggleLeftoversHint(){
+  st.leftoversOn = !st.leftoversOn;
+  var btn  = document.getElementById('leftovers-toggle');
+  var hint = document.getElementById('leftover-hint');
+  if(btn){
+    btn.classList.toggle('selected', st.leftoversOn);
+    btn.classList.toggle('border-slate-600', !st.leftoversOn);
+    btn.classList.toggle('text-slate-400', !st.leftoversOn);
+    btn.textContent = st.leftoversOn ? '🍱 On' : '🍱 Off';
+  }
+  if(hint) hint.classList.toggle('hidden', !st.leftoversOn);
 }
 function toggleLandingPref(btn, pref){
   var idx = st.prefs.indexOf(pref);
@@ -868,15 +886,13 @@ function startPlanning(){
 }
 // Restore landing state on load
 function restoreLandingState(){
-  // Budget buttons
-  document.querySelectorAll('.budget-opt').forEach(function(b){
-    var on = b.dataset.budget === st.budget;
-    b.classList.toggle('selected', on);
-    b.classList.toggle('border-slate-600', !on);
-    b.classList.toggle('text-slate-400', !on);
-    b.classList.toggle('border-primary', false); // CSS handles selected
-    b.classList.toggle('text-primary', false);
-  });
+  // Budget slider
+  var bidx = BUDGET_VALS.indexOf(st.budget);
+  if(bidx === -1) bidx = 2;
+  var slider = document.getElementById('budget-slider');
+  var lbl    = document.getElementById('budget-label');
+  if(slider){ slider.value = bidx; slider.style.setProperty('--pct',(bidx/3*100).toFixed(1)+'%'); }
+  if(lbl) lbl.textContent = BUDGET_LABELS[bidx];
   // Vibe buttons
   document.querySelectorAll('.vibe-opt').forEach(function(b){
     var on = b.dataset.vibe === st.vibe;
@@ -884,6 +900,16 @@ function restoreLandingState(){
     b.classList.toggle('border-slate-600', !on);
     b.classList.toggle('text-slate-400', !on);
   });
+  // Leftovers toggle
+  var ltBtn = document.getElementById('leftovers-toggle');
+  var hint  = document.getElementById('leftover-hint');
+  if(ltBtn){
+    ltBtn.classList.toggle('selected', !!st.leftoversOn);
+    ltBtn.classList.toggle('border-slate-600', !st.leftoversOn);
+    ltBtn.classList.toggle('text-slate-400', !st.leftoversOn);
+    ltBtn.textContent = st.leftoversOn ? '🍱 On' : '🍱 Off';
+  }
+  if(hint) hint.classList.toggle('hidden', !st.leftoversOn);
   // Diet pref chips
   document.querySelectorAll('.landing-pref-chip').forEach(function(btn){
     var on = st.prefs.indexOf(btn.dataset.pref)!==-1;
@@ -1118,7 +1144,7 @@ function generatePlan(){
   btn.innerHTML = '<span class="ms text-[18px] animate-spin">progress_activity</span> Generating...';
   setTimeout(function(){
     st.plan={}; st.leftovers={};
-    var useLeftovers = (st.budget==='low' || st.vibe==='minimal');
+    var useLeftovers = !!st.leftoversOn;
 
     if(useLeftovers){
       // Pick 2 batch/dinner recipes and 2 batch/lunch recipes, spread as leftovers
@@ -1171,7 +1197,7 @@ function generatePlan(){
     btn.disabled = false;
     btn.innerHTML = '<span class="ms text-[18px]">shuffle</span> Regenerate';
     renderPlan();
-    var tip = (st.budget==='low'||st.vibe==='minimal') ? 'Plan generated with leftovers! 🍱' : 'Meal plan generated!';
+    var tip = st.leftoversOn ? 'Plan generated with leftovers! 🍱' : 'Meal plan generated!';
     toast(tip);
   },400);
 }
