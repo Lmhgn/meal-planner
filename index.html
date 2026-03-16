@@ -264,6 +264,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     <span class="text-lg font-extrabold tracking-tight">Chefly</span>
   </div>
   <nav class="hidden md:flex items-center gap-1">
+    <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="landing" onclick="showPage('landing')">Generate</button>
     <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="home" onclick="showPage('home')">Recipes</button>
     <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="plan" onclick="showPage('plan')">Meal Plan</button>
     <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="shop" onclick="showPage('shop')">Shopping</button>
@@ -436,16 +437,19 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 <!-- BOTTOM NAV (mobile) -->
 <nav id="bottom-nav" style="display:none" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-primary/10 flex justify-around items-center py-2 z-50">
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-4 py-1" data-page="home" onclick="showPage('home')">
-    <span class="ms text-[24px]">home</span><span class="text-[10px] font-bold">Home</span>
+  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="landing" onclick="showPage('landing')">
+    <span class="ms text-[24px]">auto_awesome</span><span class="text-[10px] font-bold">Generate</span>
   </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-4 py-1" data-page="plan" onclick="showPage('plan')">
+  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="home" onclick="showPage('home')">
+    <span class="ms text-[24px]">home</span><span class="text-[10px] font-bold">Recipes</span>
+  </button>
+  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="plan" onclick="showPage('plan')">
     <span class="ms text-[24px]">calendar_month</span><span class="text-[10px] font-bold">Plan</span>
   </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-4 py-1" data-page="shop" onclick="showPage('shop')">
+  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="shop" onclick="showPage('shop')">
     <span class="ms text-[24px]">shopping_cart</span><span class="text-[10px] font-bold">Shop</span>
   </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-4 py-1" data-page="saved" onclick="showPage('saved')">
+  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="saved" onclick="showPage('saved')">
     <span class="ms text-[24px]">favorite</span><span class="text-[10px] font-bold">Saved</span>
   </button>
 </nav>
@@ -964,9 +968,8 @@ function showPage(page){
   for(var i=0;i<pages.length;i++) pages[i].classList.remove('active');
   document.getElementById('page-'+page).classList.add('active');
 
-  // Hide header on landing
-  document.getElementById('main-header').style.display = (page==='landing') ? 'none' : '';
-  document.getElementById('bottom-nav').style.display = (page==='landing') ? 'none' : '';
+  document.getElementById('main-header').style.display = '';
+  document.getElementById('bottom-nav').style.display = '';
 
   var tabs = document.querySelectorAll('.nav-tab, .bnav');
   for(var i=0;i<tabs.length;i++){
