@@ -1170,36 +1170,41 @@ function generatePlan(){
     var useLeftovers = !!st.leftoversOn;
 
     if(useLeftovers){
-      // Pick 2 batch/dinner recipes and 2 batch/lunch recipes, spread as leftovers
-      var batchDinner = RECIPES.filter(function(r){ return r.meal==='dinner'&&(r.cat.indexOf('batchCook')!==-1||r.cat.indexOf('quick')!==-1); });
-      var batchLunch  = RECIPES.filter(function(r){ return r.meal==='lunch' &&(r.cat.indexOf('batchCook')!==-1||r.cat.indexOf('quick')!==-1); });
-      if(!batchDinner.length) batchDinner = RECIPES.filter(function(r){return r.meal==='dinner';});
-      if(!batchLunch.length)  batchLunch  = RECIPES.filter(function(r){return r.meal==='lunch';});
-      batchDinner = shuffle(batchDinner); batchLunch = shuffle(batchLunch);
-      // Apply prefs
-      var filtD = batchDinner.filter(function(r){ if(!st.prefs.length)return true; for(var p=0;p<st.prefs.length;p++)if(r.cat.indexOf(st.prefs[p])!==-1)return true; return false; });
-      var filtL = batchLunch.filter(function(r){ if(!st.prefs.length)return true; for(var p=0;p<st.prefs.length;p++)if(r.cat.indexOf(st.prefs[p])!==-1)return true; return false; });
-      if(!filtD.length)filtD=batchDinner; if(!filtL.length)filtL=batchLunch;
-      // 2 anchor recipes per meal type
-      var dA=filtD[0], dB=filtD[1]||filtD[0];
-      var lA=filtL[0], lB=filtL[1]||filtL[0];
-      // Dinner schedule: dA=Mon,Tue,Wed  dB=Thu,Fri,Sat,Sun
-      var dinnerPicks=[dA.id,dA.id,dA.id,dB.id,dB.id,dB.id,dB.id];
-      // Lunch schedule: lA=Mon,Tue,Wed,Thu  lB=Fri,Sat,Sun
-      var lunchPicks=[lA.id,lA.id,lA.id,lA.id,lB.id,lB.id,lB.id];
-      for(var d=0;d<7;d++){
-        st.plan[planKey(d,'dinner')] = dinnerPicks[d];
-        st.plan[planKey(d,'lunch')]  = lunchPicks[d];
-        // Mark as leftover (not the first occurrence)
-        if(d>0 && dinnerPicks[d]===dinnerPicks[d-1]) st.leftovers[planKey(d,'dinner')]=true;
-        if(d>0 && lunchPicks[d]===lunchPicks[d-1])   st.leftovers[planKey(d,'lunch')]=true;
-      }
-      // Portion multiplier: count how many days each recipe is used
-      st.portionMult = {};
-      [dA.id,dB.id,lA.id,lB.id].forEach(function(id){
-        var count=0;
-        Object.keys(st.plan).forEach(function(k){ if(st.plan[k]===id) count++; });
-        st.portionMult[id]=count;
+      // Fill each meal type day-by-day.
+      // Each recipe spans 2 days (cook + 1 leftover) unless it has batchCook,
+      // in which case it spans 3 days (cook + 2 leftovers).
+      ['dinner','lunch'].forEach(function(mt){
+        var pool = RECIPES.filter(function(r){
+          if(r.meal!==mt) return false;
+          if(!st.prefs.length) return true;
+          for(var p=0;p<st.prefs.length;p++) if(r.cat.indexOf(st.prefs[p])!==-1) return true;
+          return false;
+        });
+        if(!pool.length) pool = RECIPES.filter(function(r){ return r.meal===mt; });
+        pool = shuffle(pool);
+        var day=0, poolIdx=0, lastId=null;
+        while(day<7){
+          // Pick next recipe, avoiding repeating the previous one
+          var r=null;
+          for(var t=0;t<pool.length;t++){
+            var c=pool[(poolIdx+t)%pool.length];
+            if(c.id!==lastId){ r=c; poolIdx=(poolIdx+t+1)%pool.length; break; }
+          }
+          if(!r){ r=pool[poolIdx%pool.length]; poolIdx=(poolIdx+1)%pool.length; }
+          lastId=r.id;
+          var span = (r.cat.indexOf('batchCook')!==-1) ? 3 : 2;
+          for(var s=0;s<span&&day+s<7;s++){
+            var key=planKey(day+s,mt);
+            st.plan[key]=r.id;
+            if(s>0) st.leftovers[key]=true;
+          }
+          day+=span;
+        }
+      });
+      // portionMult: total slots each recipe fills (used by shopping list for quantity scaling)
+      st.portionMult={};
+      Object.keys(st.plan).forEach(function(k){
+        var id=st.plan[k]; st.portionMult[id]=(st.portionMult[id]||0)+1;
       });
     } else {
       for(var d=0;d<7;d++){
@@ -1405,9 +1410,8 @@ function buildShopList(){
   var cats = {};
   recipes.forEach(function(r){
     var timesUsed = ridCount[r.id]||1;
-    // For leftover batching, portionMult tells us total portions cooked at once
-    // We only need to buy once (1 cook) but scaled up
-    var buyMult = (st.portionMult && st.portionMult[r.id]) ? 1 : timesUsed;
+    // For leftovers, you cook once but make enough for all portions — buy timesUsed × servings worth
+    var buyMult = timesUsed;
     // Map shop categories to ingredient quantities
     Object.keys(r.shop).forEach(function(cat){
       if(!cats[cat]) cats[cat]={};
