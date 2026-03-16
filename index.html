@@ -3,800 +3,1055 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Weekly Meal Planner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin><\/script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin><\/script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+<title>Chefly — Weekly Meal Planner</title>
 <style>
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f0f14;--surface:#1a1a24;--surface2:#22222f;--surface3:#2a2a3a;
-  --border:rgba(255,255,255,0.08);--border-hover:rgba(255,255,255,0.16);
-  --text:#f0f0f5;--text-muted:#8888aa;
-  --accent:#7c6af7;--accent-light:#9d8fff;--accent-dim:rgba(124,106,247,0.15);
-  --green:#4ade80;--green-dim:rgba(74,222,128,0.12);
-  --amber:#fbbf24;--amber-dim:rgba(251,191,36,0.12);
-  --red:#f87171;--red-dim:rgba(248,113,113,0.12);
-  --teal:#2dd4bf;--teal-dim:rgba(45,212,191,0.12);
-  --pink:#f472b6;--pink-dim:rgba(244,114,182,0.12);
-  --radius:16px;--radius-sm:10px;--radius-xs:6px;
-  --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-lg:0 8px 40px rgba(0,0,0,0.6);
-  --font:'Inter',system-ui,sans-serif;--font-display:'Playfair Display',Georgia,serif;
+  --bg:#f5f5f0;
+  --white:#ffffff;
+  --green:#2e7d32;
+  --green-light:#e8f5e9;
+  --dark:#1a1a1a;
+  --mid:#4a4a4a;
+  --muted:#777;
+  --light:#aaa;
+  --border:#e0e0e0;
+  --border2:#f0f0f0;
+  --shadow:0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.12);
+  --r:14px;--rs:10px;--rx:7px;
+  --font:'Segoe UI',system-ui,sans-serif;
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-button{cursor:pointer;border:none;outline:none;font-family:var(--font)}
-input,textarea{font-family:var(--font);outline:none}
-a{text-decoration:none;color:inherit}
+body{font-family:var(--font);background:var(--bg);color:var(--dark);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{cursor:pointer;border:none;font-family:var(--font);background:none}
+input,textarea,select{font-family:var(--font)}
+
+/* NAV */
+.nav{background:var(--white);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-box{width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+.nav-brand{font-size:17px;font-weight:700;color:var(--dark)}
+.nav-tabs{display:flex;gap:4px;margin-left:auto}
+.nav-tab{padding:8px 18px;border-radius:var(--rx);font-size:14px;font-weight:500;color:var(--muted);transition:all .15s;position:relative}
+.nav-tab:hover{color:var(--dark);background:var(--bg)}
+.nav-tab.active{color:var(--green);font-weight:600;background:var(--green-light)}
+.nav-tab .badge{position:absolute;top:4px;right:4px;background:var(--green);color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
 /* LAYOUT */
-.app{min-height:100vh;display:flex;flex-direction:column}
-.main-layout{display:flex;flex:1;max-width:1600px;margin:0 auto;width:100%;padding-bottom:60px}
-.sidebar{width:300px;min-width:300px;padding:24px 16px 24px 24px;position:sticky;top:72px;height:calc(100vh - 72px);overflow-y:auto}
-.content{flex:1;padding:24px 24px 24px 8px;min-width:0}
-/* HEADER */
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:72px}
-.header-logo{display:flex;align-items:center;gap:14px}
-.logo-icon{font-size:32px;line-height:1}
-.header-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text);line-height:1.1}
-.header-subtitle{font-size:12px;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase}
-.header-meta{display:flex;gap:8px;flex-wrap:wrap}
-.header-badge{background:var(--accent-dim);color:var(--accent-light);border:1px solid rgba(124,106,247,0.3);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:500}
-/* TABS */
-.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);border-radius:var(--radius-sm);padding:4px;width:fit-content}
-.tab-btn{position:relative;padding:10px 22px;border-radius:var(--radius-xs);background:transparent;color:var(--text-muted);font-size:14px;font-weight:500;transition:all .2s;letter-spacing:.01em}
-.tab-btn:hover{color:var(--text);background:var(--surface2)}
-.tab-btn.active{background:var(--accent);color:white}
-.tab-badge{display:inline-flex;align-items:center;justify-content:center;background:var(--pink);color:white;border-radius:999px;font-size:10px;font-weight:700;min-width:18px;height:18px;padding:0 5px;margin-right:6px}
-/* FILTER PANEL */
-.filter-panel{display:flex;flex-direction:column;gap:16px}
-.filter-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
-.filter-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.filter-section-title{font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
-.clear-btn{background:none;color:var(--accent-light);font-size:12px;padding:2px 8px;border-radius:var(--radius-xs);transition:background .2s}
-.clear-btn:hover{background:var(--accent-dim)}
-.servings-control{display:flex;align-items:center;gap:16px;justify-content:center;padding:4px 0}
-.servings-btn{width:36px;height:36px;border-radius:50%;background:var(--surface2);color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;transition:background .2s;line-height:1}
-.servings-btn:hover{background:var(--accent)}
-.servings-display{text-align:center;min-width:60px}
-.servings-num{display:block;font-size:28px;font-weight:700;font-family:var(--font-display);color:var(--accent-light);line-height:1}
-.servings-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
-.ingredient-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:10px 12px;font-size:14px;resize:vertical;transition:border-color .2s}
-.ingredient-input:focus{border-color:var(--accent)}
-.ingredient-input::placeholder{color:var(--text-muted)}
-.ingredient-hint{margin-top:8px;font-size:12px;color:var(--text-muted);line-height:1.5}
-.ingredient-hint strong{color:var(--teal)}
-.filter-grid{display:flex;flex-direction:column;gap:6px}
-.filter-chip{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);text-align:left;transition:all .2s;font-size:13px}
-.filter-chip:hover{border-color:var(--border-hover);color:var(--text)}
-.filter-chip.active{background:var(--accent-dim);border-color:rgba(124,106,247,0.4);color:var(--accent-light)}
-.chip-icon{font-size:15px;flex-shrink:0}
-.chip-label{font-weight:500}
-.filter-actions{display:flex;flex-direction:column;gap:8px}
-.generate-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),#9d60f7);color:white;font-size:15px;font-weight:600;transition:all .2s;box-shadow:0 4px 20px rgba(124,106,247,0.4)}
-.generate-btn:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,106,247,0.5)}
-.generate-btn:active{transform:translateY(0)}
-.clear-all-btn{background:none;color:var(--text-muted);font-size:13px;padding:8px;border-radius:var(--radius-xs);transition:color .2s;text-align:center;width:100%}
-.clear-all-btn:hover{color:var(--text)}
-.filter-tip{display:flex;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.filter-tip p{font-size:12px;color:var(--text-muted);line-height:1.6}
-.filter-tip strong{color:var(--amber)}
-/* EMPTY STATE */
-.empty-state{display:flex;align-items:center;justify-content:center;min-height:480px;padding:40px 20px}
-.empty-state-inner{text-align:center;max-width:420px}
-.empty-emoji{font-size:64px;display:block;margin-bottom:20px}
-.empty-title{font-family:var(--font-display);font-size:28px;font-weight:700;margin-bottom:12px;color:var(--text)}
-.empty-desc{color:var(--text-muted);font-size:15px;line-height:1.7;margin-bottom:28px}
-.empty-desc strong{color:var(--accent-light)}
-.empty-cta{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:var(--radius);background:linear-gradient(135deg,var(--accent),#9d60f7);color:white;font-size:15px;font-weight:600;box-shadow:0 4px 20px rgba(124,106,247,0.4);transition:all .2s}
-.empty-cta:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(124,106,247,0.5)}
-/* WEEK GRID */
-.week-grid-header{margin-bottom:20px}
-.week-grid-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px}
-.week-grid-sub{color:var(--text-muted);font-size:14px}
-.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
-.day-label{text-align:center;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;padding:6px 0 10px}
-.day-meals{display:flex;flex-direction:column;gap:8px}
-.meal-type-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:0 0 5px 2px}
-.meal-type-label.lunch{color:var(--amber)}
-.meal-type-label.dinner{color:var(--accent-light)}
-/* RECIPE CARD */
-.recipe-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column}
-.recipe-card:hover{border-color:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow)}
-.recipe-card.empty{cursor:default;padding:20px;align-items:center;justify-content:center;min-height:100px}
-.recipe-card.empty:hover{transform:none;box-shadow:none}
-.empty-label{color:var(--text-muted);font-size:12px;text-align:center}
-.card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 0}
-.card-emoji{font-size:26px;line-height:1}
-.card-header-actions{display:flex;gap:4px}
-.fav-btn,.reroll-btn{width:26px;height:26px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--text-muted)}
-.fav-btn:hover{background:var(--pink-dim);color:var(--pink)}
-.fav-btn.active{background:var(--pink-dim);color:var(--pink)}
-.reroll-btn{font-size:11px}
-.reroll-btn:hover{background:var(--accent-dim)}
-.card-body{padding:8px 10px 12px;flex:1;display:flex;flex-direction:column;gap:5px}
-.card-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
-.card-source{font-size:11px;color:var(--accent-light)}
-.card-source a:hover{text-decoration:underline}
-.card-tags{display:flex;flex-wrap:wrap;gap:3px}
-.card-tag{font-size:10px;font-weight:500;padding:2px 5px;border-radius:3px}
-.card-meta{display:flex;gap:8px;font-size:11px;color:var(--text-muted)}
-.card-nutrition{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;margin-top:2px}
-.nutr-pill{border-radius:5px;padding:3px 5px;display:flex;flex-direction:column;align-items:center}
-.nutr-pill-val{font-size:11px;font-weight:700;line-height:1.2}
-.nutr-pill-lbl{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em}
+.page{display:none;max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+.page.active{display:block}
+
+/* HERO */
+.hero{margin-bottom:28px}
+.hero h1{font-size:26px;font-weight:800;color:var(--dark);margin-bottom:4px}
+.hero p{font-size:14px;color:var(--muted)}
+
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-hdr h2{font-size:18px;font-weight:700}
+.link-btn{font-size:13px;font-weight:600;color:var(--green);background:none;border:none;cursor:pointer}
+.link-btn:hover{text-decoration:underline}
+
+/* FILTER ROW */
+.filter-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;align-items:center}
+.filter-chip{padding:7px 16px;border-radius:99px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:500;color:var(--dark);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.filter-chip:hover{border-color:#999}
+.filter-chip.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.filter-chip.on-green{background:var(--green);color:#fff;border-color:var(--green)}
+.servings-ctrl{display:flex;align-items:center;gap:8px;margin-left:auto;background:var(--white);border:1.5px solid var(--border);border-radius:99px;padding:5px 14px}
+.srv-btn{width:26px;height:26px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--dark);transition:background .15s}
+.srv-btn:hover{background:var(--border)}
+.srv-num{font-size:15px;font-weight:700;min-width:24px;text-align:center}
+.srv-lbl{font-size:12px;color:var(--muted)}
+
+/* RECIPE GRID */
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;margin-bottom:32px}
+.rcard{background:var(--white);border-radius:var(--r);overflow:hidden;cursor:pointer;box-shadow:var(--shadow);transition:all .2s;border:1.5px solid transparent}
+.rcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--border)}
+.rcard-top{height:160px;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,#f9f9f7,#efefeb);position:relative}
+.rcard-fav{position:absolute;top:10px;right:10px;width:30px;height:30px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 1px 4px rgba(0,0,0,.15);transition:transform .15s;z-index:1}
+.rcard-fav:hover{transform:scale(1.2)}
+.rcard-cat-dot{position:absolute;bottom:10px;left:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:var(--dark);color:#fff;padding:3px 8px;border-radius:5px}
+.rcard-body{padding:14px}
+.rcard-name{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px;line-height:1.3}
+.rcard-meta{display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:8px}
+.rcard-desc{font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rcard-nutr{display:flex;gap:8px;margin-top:10px}
+.nutr-pill{flex:1;text-align:center;background:var(--bg);border-radius:6px;padding:5px 4px}
+.nutr-pill-val{display:block;font-size:12px;font-weight:700;color:var(--dark)}
+.nutr-pill-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+
+/* PLAN PAGE */
+.plan-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.plan-top h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.plan-top p{font-size:13px;color:var(--muted)}
+.gen-btn{padding:12px 24px;background:var(--green);color:#fff;border-radius:var(--rs);font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.gen-btn:hover{background:#256427}
+.gen-btn:disabled{opacity:.6;cursor:not-allowed}
+
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:12px}
+.day-hdr{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--white);border-radius:var(--rx);padding:8px 4px;margin-bottom:6px;border:1px solid var(--border)}
+.day-hdr.today{background:var(--green);color:#fff;border-color:var(--green)}
+.meal-slot{background:var(--white);border-radius:var(--rs);overflow:hidden;margin-bottom:6px;box-shadow:var(--shadow);cursor:pointer;transition:all .18s;border:1.5px solid transparent;min-height:90px;display:flex;flex-direction:column}
+.meal-slot:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--border)}
+.meal-slot.empty{cursor:default;align-items:center;justify-content:center;background:var(--border2);box-shadow:none}
+.meal-slot.empty:hover{transform:none;box-shadow:none;border-color:transparent}
+.meal-slot-emoji{font-size:32px;text-align:center;padding:10px 8px 4px;background:linear-gradient(135deg,#f9f9f7,#efefeb)}
+.meal-slot-body{padding:6px 8px 8px;flex:1}
+.meal-slot-type{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:2px}
+.meal-slot-name{font-size:11px;font-weight:600;color:var(--dark);line-height:1.3}
+.meal-slot-actions{display:flex;gap:3px;padding:0 6px 6px}
+.slot-btn{width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;transition:background .12s}
+.slot-btn:hover{background:var(--border)}
+.empty-slot-txt{font-size:11px;color:var(--light);text-align:center;padding:8px}
+
+.plan-pref{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;align-items:center}
+.pref-lbl{font-size:13px;font-weight:600;color:var(--mid);margin-right:4px}
+
+/* SHOPPING */
+.shop-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.shop-top h1{font-size:22px;font-weight:800;margin-bottom:4px}
+.shop-top p{font-size:13px;color:var(--muted)}
+.shop-top-btns{display:flex;gap:8px}
+.outline-btn{padding:9px 16px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:600;color:var(--dark);transition:all .15s;cursor:pointer}
+.outline-btn:hover{border-color:#999;background:var(--bg)}
+.prog-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.prog-track{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green);border-radius:4px;transition:width .3s}
+.prog-lbl{font-size:12px;color:var(--muted);white-space:nowrap}
+.shop-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:20px}
+.shop-cat{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.shop-cat-hdr{padding:11px 14px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.shop-cat-count{background:var(--green-light);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px}
+.shop-items{list-style:none;padding:4px}
+.shop-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;transition:background .1s}
+.shop-item:hover{background:var(--bg)}
+.shop-item.done{opacity:.45}
+.shop-item.done .shop-item-name{text-decoration:line-through}
+.chkbox{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;transition:all .12s}
+.chkbox.on{background:var(--green);border-color:var(--green)}
+.shop-item-name{flex:1;font-size:13px;color:var(--dark)}
+.shop-item-qty{font-size:12px;color:var(--muted);font-weight:500}
+.shop-empty{display:flex;flex-direction:column;align-items:center;padding:60px 20px;text-align:center;color:var(--muted)}
+.shop-empty-icon{font-size:48px;margin-bottom:12px}
+.shop-empty p{font-size:14px;line-height:1.6;max-width:300px}
+
+/* SAVED */
+.saved-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.saved-empty{display:flex;flex-direction:column;align-items:center;padding:80px 20px;text-align:center;color:var(--muted)}
+.saved-empty-icon{font-size:56px;margin-bottom:12px}
+.saved-empty h2{font-size:20px;font-weight:700;color:var(--dark);margin-bottom:8px}
+.saved-empty p{font-size:14px;max-width:320px;line-height:1.6}
+
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);animation:fadeIn .15s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{background:var(--surface);border:1px solid var(--border-hover);border-radius:20px;max-width:700px;width:100%;max-height:92vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-lg);animation:slideUp .2s ease}
-@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-close-btn{position:sticky;top:12px;float:right;width:32px;height:32px;background:var(--surface2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted);cursor:pointer;margin:12px 12px 0 0;transition:all .15s;z-index:1;border:none}
-.modal-close-btn:hover{background:var(--red-dim);color:var(--red)}
-.modal-hero{display:flex;gap:16px;align-items:flex-start;padding:8px 24px 0}
-.modal-emoji{font-size:52px;line-height:1;flex-shrink:0}
-.modal-hero-info{flex:1;min-width:0}
-.modal-meal-tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px}
-.modal-title{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:4px}
-.modal-source{font-size:13px;color:var(--accent-light);margin-bottom:8px}
-.modal-source a:hover{text-decoration:underline}
-.modal-tags{display:flex;flex-wrap:wrap;gap:5px}
-.modal-fav-btn{flex-shrink:0;width:38px;height:38px;border-radius:50%;background:var(--surface2);font-size:20px;color:var(--text-muted);display:flex;align-items:center;justify-content:center;transition:all .15s;border:none;cursor:pointer}
-.modal-fav-btn:hover,.modal-fav-btn.active{background:var(--pink-dim);color:var(--pink)}
-.modal-stats{display:flex;gap:0;margin:16px 24px;background:var(--surface2);border-radius:var(--radius);padding:4px}
-.modal-stat{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 4px;border-radius:var(--radius-sm)}
-.stat-icon{font-size:16px}
-.stat-val{font-size:15px;font-weight:700;color:var(--text);line-height:1.1}
-.stat-lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em}
-.modal-desc{padding:0 24px 16px;font-size:14px;color:var(--text-muted);line-height:1.7;border-bottom:1px solid var(--border)}
-.modal-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
-.modal-section{padding:18px 24px;border-bottom:1px solid var(--border)}
-.modal-section:nth-child(odd){border-right:1px solid var(--border)}
-.modal-section.full{grid-column:1/-1}
-.modal-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px}
-.modal-section-sub{font-size:12px;color:var(--accent-light);margin-bottom:10px}
-.ingredient-list{list-style:none;display:flex;flex-direction:column;gap:7px}
-.ingredient-item{display:flex;align-items:flex-start;gap:8px;font-size:13px}
-.ing-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px}
-.ing-qty{color:var(--accent-light);font-weight:600;white-space:nowrap}
-.ing-name{color:var(--text)}
-.ing-unit{color:var(--text-muted);font-size:12px}
-.per-srv{font-size:10px;background:var(--accent-dim);color:var(--accent-light);padding:1px 4px;border-radius:3px;margin-left:3px;vertical-align:middle}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.overlay.hidden{display:none}
+.modal{background:var(--white);border-radius:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border2);position:sticky;top:0;background:var(--white);z-index:1}
+.modal-back{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--green);cursor:pointer;background:none;border:none}
+.modal-back:hover{text-decoration:underline}
+.modal-nav-actions{display:flex;gap:8px}
+.modal-icon-btn{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;transition:all .12s}
+.modal-icon-btn:hover{background:var(--border)}
+.modal-emoji{font-size:80px;text-align:center;padding:28px 20px 16px;background:linear-gradient(135deg,#f9f9f7,#efefeb)}
+.modal-body{padding:20px 24px 32px}
+.modal-cat{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:6px}
+.modal-title{font-size:26px;font-weight:800;color:var(--dark);margin-bottom:10px;line-height:1.2}
+.modal-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.modal-stat{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);padding:6px 12px;border-radius:99px;font-size:12px;font-weight:500;color:var(--dark)}
+.modal-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border2)}
+.modal-cols{display:grid;grid-template-columns:1fr 1.1fr;gap:24px;margin-bottom:20px}
+.modal-section h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--dark)}
+.modal-section h3 span{font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.ing-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.ing-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.4}
+.ing-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px}
+.ing-qty{font-weight:700;color:var(--dark);min-width:40px}
+.ing-name{color:var(--mid)}
 .steps-list{list-style:none;display:flex;flex-direction:column;gap:12px}
-.step-item{display:flex;gap:10px;align-items:flex-start}
-.step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.step-text{font-size:13px;color:var(--text-muted);line-height:1.6;flex:1}
-.nutr-section{display:flex;gap:20px;align-items:flex-start}
-.cal-box{text-align:center;background:var(--surface2);border-radius:var(--radius);padding:16px 18px;flex-shrink:0}
-.cal-num{display:block;font-family:var(--font-display);font-size:38px;font-weight:700;color:var(--amber);line-height:1}
-.cal-lbl{font-size:12px;color:var(--text-muted)}
-.nutr-bars{flex:1;display:flex;flex-direction:column;gap:10px}
-.nutr-row-hdr{display:flex;justify-content:space-between;margin-bottom:3px}
-.nutr-name{font-size:12px;color:var(--text-muted)}
-.nutr-val{font-size:12px;font-weight:600}
-.nutr-bg{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
-.nutr-fill{height:100%;border-radius:3px;transition:width .5s ease}
-/* SHOPPING LIST */
-.shopping-list{max-width:960px}
-.shopping-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
-.shopping-title{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:4px}
-.shopping-sub{font-size:14px;color:var(--text-muted)}
-.shopping-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.copy-btn{padding:8px 16px;border-radius:var(--radius-sm);background:var(--accent);color:white;font-size:13px;font-weight:600;transition:all .2s;border:none;cursor:pointer}
-.copy-btn:hover{background:var(--accent-light)}
-.clear-chk-btn{padding:8px 12px;border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-muted);font-size:13px;transition:all .2s;border:1px solid var(--border);cursor:pointer}
-.clear-chk-btn:hover{color:var(--text);border-color:var(--border-hover)}
-.prog-wrap{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.prog-track{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:4px;transition:width .3s ease}
-.prog-lbl{font-size:12px;color:var(--text-muted);min-width:55px}
-.meal-summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:20px}
-.meal-summary-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:8px}
-.meal-summary-tags{display:flex;flex-wrap:wrap;gap:5px}
-.meal-tag{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:11px;padding:3px 9px;border-radius:var(--radius-xs)}
-.shop-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px}
-.shop-cat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.cat-title{font-size:13px;font-weight:700;padding:11px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.shop-items{list-style:none;padding:6px;display:flex;flex-direction:column;gap:1px}
-.shop-item{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--radius-xs);cursor:pointer;transition:background .15s;user-select:none}
-.shop-item:hover{background:var(--surface2)}
-.shop-item.checked{opacity:.4}
-.shop-item.checked .shop-item-name{text-decoration:line-through}
-.chkbox{width:17px;height:17px;border-radius:4px;border:2px solid var(--border-hover);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:white;transition:all .15s}
-.chkbox.ticked{background:var(--accent);border-color:var(--accent)}
-.shop-item-name{flex:1;font-size:13px;color:var(--text)}
-.shop-item-qty{font-size:12px;color:var(--text-muted);font-weight:500;white-space:nowrap;text-align:right;min-width:55px}
-.shop-note{display:flex;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:12px;color:var(--text-muted);line-height:1.6}
-/* FAVOURITES */
-.fav-header{margin-bottom:22px}
-.fav-title{font-family:var(--font-display);font-size:24px;font-weight:700;margin-bottom:4px}
-.fav-sub{font-size:14px;color:var(--text-muted)}
-.fav-section{margin-bottom:28px}
-.fav-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:12px}
-.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.fav-card{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all .2s}
-.fav-card:hover{border-color:var(--border-hover);transform:translateY(-1px);box-shadow:var(--shadow)}
-.fav-emoji{font-size:32px;flex-shrink:0}
-.fav-body{flex:1;min-width:0}
-.fav-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
-.fav-src{font-size:12px;color:var(--accent-light);margin-bottom:4px}
-.fav-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--text-muted)}
-.fav-remove{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--pink-dim);color:var(--pink);font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .15s;border:none;cursor:pointer}
-.fav-remove:hover{background:var(--pink);color:white}
+.step-item{display:flex;gap:10px;font-size:13px;color:var(--mid);line-height:1.6}
+.step-n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.nutr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.nutr-box{background:var(--bg);border-radius:var(--rx);padding:12px;text-align:center}
+.nutr-box-val{font-size:22px;font-weight:800;color:var(--dark);display:block}
+.nutr-box-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.add-plan-btn{width:100%;padding:14px;background:var(--green);color:#fff;border-radius:var(--rs);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;margin-top:20px;cursor:pointer;border:none}
+.add-plan-btn:hover{background:#256427}
+
 /* RESPONSIVE */
-@media(max-width:1100px){.days-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:900px){
-  .main-layout{flex-direction:column}
-  .sidebar{width:100%;min-width:unset;position:static;height:auto;padding:16px}
-  .content{padding:0 16px 16px}
-  .days-grid{grid-template-columns:repeat(2,1fr)}
+  .week-grid{grid-template-columns:repeat(4,1fr)}
 }
-@media(max-width:700px){
-  .header-meta{display:none}
-  .days-grid{grid-template-columns:1fr 1fr;overflow-x:auto}
-  .modal-body{grid-template-columns:1fr}
-  .modal-section:nth-child(odd){border-right:none}
-  .modal-section.full{grid-column:1}
-  .nutr-section{flex-direction:column}
+@media(max-width:640px){
+  .page{padding:16px 14px 70px}
+  .week-grid{grid-template-columns:repeat(2,1fr)}
+  .modal-cols{grid-template-columns:1fr}
+  .nav{padding:0 14px}
+  .nav-tab{padding:8px 10px}
+  .nutr-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--dark);color:#fff;padding:12px 20px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const { useState, useCallback, useEffect } = React;
 
-const RECIPES = [
-  {id:"l001",name:"Smashed Cucumber & Peanut Noodles",meal:"lunch",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["vegetarian","vegan","quick","highProtein"],cookTime:15,prepTime:10,image:"🥒",description:"Silky rice noodles tossed in a punchy sesame-peanut dressing with smashed cucumber, spring onion and chilli. Ready in 15 minutes.",ingredients:[{item:"Rice noodles",qty:100,unit:"g",perServing:true},{item:"Cucumber",qty:1,unit:"whole",perServing:false},{item:"Peanut butter",qty:3,unit:"tbsp",perServing:false},{item:"Soy sauce",qty:2,unit:"tbsp",perServing:false},{item:"Sesame oil",qty:1,unit:"tbsp",perServing:false},{item:"Rice vinegar",qty:1,unit:"tbsp",perServing:false},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false},{item:"Spring onions",qty:3,unit:"whole",perServing:false},{item:"Red chilli",qty:1,unit:"whole",perServing:false},{item:"Sesame seeds",qty:1,unit:"tbsp",perServing:false},{item:"Lime",qty:1,unit:"whole",perServing:false}],nutrition:{calories:420,protein:14,carbs:58,fat:16,fibre:4},steps:["Cook rice noodles per packet instructions, drain and rinse cold.","Smash cucumber with a rolling pin, tear into chunks, salt and leave 5 mins then drain.","Whisk peanut butter, soy sauce, sesame oil, rice vinegar, minced garlic and lime juice.","Toss noodles and cucumber in dressing. Top with spring onion, chilli and sesame seeds."]},
-  {id:"l002",name:"Roasted Red Pepper & Tomato Soup",meal:"lunch",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["vegetarian","vegan","batchCook","healthy"],cookTime:35,prepTime:10,image:"🫑",description:"Deep, smoky roasted pepper and tomato soup — perfect for batch cooking. Serve with crusty bread.",ingredients:[{item:"Red peppers",qty:4,unit:"whole",perServing:false},{item:"Tinned chopped tomatoes",qty:2,unit:"400g tins",perServing:false},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Garlic bulb",qty:1,unit:"whole",perServing:false},{item:"Vegetable stock",qty:500,unit:"ml",perServing:false},{item:"Smoked paprika",qty:1,unit:"tsp",perServing:false},{item:"Olive oil",qty:2,unit:"tbsp",perServing:false},{item:"Sourdough bread",qty:2,unit:"slices",perServing:true}],nutrition:{calories:280,protein:7,carbs:42,fat:9,fibre:8},steps:["Halve peppers, place with garlic and onion on a tray, drizzle oil, roast at 200°C for 25 mins.","Squeeze garlic from skins, blend all roasted veg with tomatoes, stock and paprika.","Simmer 10 mins, season well. Serve with crusty sourdough."]},
-  {id:"l003",name:"Chicken Caesar Wrap",meal:"lunch",source:"BBC Good Food",sourceUrl:"https://www.bbcgoodfood.com",category:["meat","quick","highProtein"],cookTime:15,prepTime:10,image:"🌯",description:"Grilled chicken, crisp romaine, parmesan and a creamy Caesar dressing in a toasted flour tortilla.",ingredients:[{item:"Chicken breast",qty:150,unit:"g",perServing:true},{item:"Flour tortilla",qty:1,unit:"large",perServing:true},{item:"Romaine lettuce",qty:2,unit:"handfuls",perServing:true},{item:"Parmesan",qty:20,unit:"g",perServing:true},{item:"Caesar dressing",qty:2,unit:"tbsp",perServing:true},{item:"Lemon",qty:0.5,unit:"whole",perServing:true},{item:"Olive oil",qty:1,unit:"tbsp",perServing:false},{item:"Garlic powder",qty:0.5,unit:"tsp",perServing:false}],nutrition:{calories:490,protein:42,carbs:38,fat:18,fibre:3},steps:["Season chicken with garlic powder, salt and pepper. Pan-fry in olive oil 6–7 mins each side.","Slice chicken, toss with lettuce, parmesan, dressing and lemon juice.","Fill tortilla, fold and toast in a dry pan 1 min each side."]},
-  {id:"l004",name:"Spiced Lentil & Spinach Soup",meal:"lunch",source:"The Happy Pear",sourceUrl:"https://thehappypear.ie",category:["vegetarian","vegan","batchCook","highProtein","healthy"],cookTime:30,prepTime:10,image:"🍵",description:"Hearty red lentil soup loaded with spinach, cumin and coriander. A complete meal in a bowl.",ingredients:[{item:"Red lentils",qty:200,unit:"g",perServing:false},{item:"Baby spinach",qty:100,unit:"g",perServing:false},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Garlic cloves",qty:3,unit:"cloves",perServing:false},{item:"Ground cumin",qty:2,unit:"tsp",perServing:false},{item:"Ground coriander",qty:1,unit:"tsp",perServing:false},{item:"Turmeric",qty:0.5,unit:"tsp",perServing:false},{item:"Vegetable stock",qty:1,unit:"litre",perServing:false},{item:"Tinned chopped tomatoes",qty:1,unit:"400g tin",perServing:false},{item:"Lemon",qty:1,unit:"whole",perServing:false},{item:"Olive oil",qty:1,unit:"tbsp",perServing:false}],nutrition:{calories:310,protein:20,carbs:48,fat:4,fibre:12},steps:["Sauté onion and garlic in oil until soft. Add spices and cook 1 min.","Add lentils, tomatoes and stock. Simmer 20–25 mins until lentils are soft.","Stir in spinach until wilted. Squeeze in lemon, season and serve."]},
-  {id:"l005",name:"Prawn Avocado Rice Bowl",meal:"lunch",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["fish","quick","highProtein","healthy"],cookTime:20,prepTime:10,image:"🍤",description:"Garlic-butter prawns over jasmine rice with sliced avocado, edamame and a soy-sesame drizzle.",ingredients:[{item:"Raw king prawns",qty:150,unit:"g",perServing:true},{item:"Jasmine rice",qty:80,unit:"g",perServing:true},{item:"Avocado",qty:0.5,unit:"whole",perServing:true},{item:"Frozen edamame",qty:60,unit:"g",perServing:true},{item:"Butter",qty:15,unit:"g",perServing:false},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false},{item:"Soy sauce",qty:1,unit:"tbsp",perServing:false},{item:"Sesame oil",qty:1,unit:"tsp",perServing:false},{item:"Spring onions",qty:2,unit:"whole",perServing:false},{item:"Sesame seeds",qty:1,unit:"tsp",perServing:false}],nutrition:{calories:510,protein:35,carbs:52,fat:18,fibre:6},steps:["Cook rice per packet instructions. Blanch edamame 3 mins.","Melt butter in pan, add garlic 30 secs, then prawns 2–3 mins until pink.","Assemble bowl: rice base, prawns, avocado slices, edamame. Drizzle soy and sesame oil."]},
-  {id:"l006",name:"Greek Chicken Pita with Tzatziki",meal:"lunch",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["meat","quick","highProtein"],cookTime:15,prepTime:15,image:"🫓",description:"Oregano-marinated chicken thigh in warm pita with homemade tzatziki, tomato and red onion.",ingredients:[{item:"Chicken thighs (boneless)",qty:160,unit:"g",perServing:true},{item:"Pita bread",qty:1,unit:"whole",perServing:true},{item:"Greek yoghurt",qty:3,unit:"tbsp",perServing:true},{item:"Cucumber",qty:0.25,unit:"whole",perServing:true},{item:"Cherry tomatoes",qty:5,unit:"whole",perServing:true},{item:"Red onion",qty:0.5,unit:"whole",perServing:false},{item:"Dried oregano",qty:1,unit:"tsp",perServing:false},{item:"Garlic cloves",qty:1,unit:"cloves",perServing:false},{item:"Lemon",qty:0.5,unit:"whole",perServing:false},{item:"Olive oil",qty:1,unit:"tbsp",perServing:false}],nutrition:{calories:520,protein:38,carbs:45,fat:17,fibre:4},steps:["Marinate chicken in oregano, lemon juice, garlic and olive oil for 10 mins (or overnight).","Grill or pan-fry 6–7 mins each side. Rest and slice.","Mix yoghurt, grated cucumber and garlic for tzatziki. Warm pita, fill and serve."]},
-  {id:"l007",name:"Halloumi & Roasted Veg Grain Bowl",meal:"lunch",source:"Ottolenghi",sourceUrl:"https://ottolenghi.co.uk",category:["vegetarian","healthy","highProtein"],cookTime:30,prepTime:10,image:"🧀",description:"Golden halloumi, roasted courgette and peppers over herby bulgur wheat with a lemon-tahini dressing.",ingredients:[{item:"Halloumi",qty:80,unit:"g",perServing:true},{item:"Bulgur wheat",qty:70,unit:"g",perServing:true},{item:"Courgette",qty:1,unit:"whole",perServing:false},{item:"Red pepper",qty:1,unit:"whole",perServing:false},{item:"Tahini",qty:1,unit:"tbsp",perServing:false},{item:"Lemon",qty:1,unit:"whole",perServing:false},{item:"Flat-leaf parsley",qty:1,unit:"handful",perServing:false},{item:"Olive oil",qty:2,unit:"tbsp",perServing:false},{item:"Garlic cloves",qty:1,unit:"cloves",perServing:false}],nutrition:{calories:540,protein:28,carbs:50,fat:24,fibre:7},steps:["Roast courgette and pepper chunks at 200°C for 20 mins with olive oil.","Cook bulgur per packet. Stir in parsley and lemon zest.","Fry halloumi slices in dry pan 2 mins each side until golden.","Whisk tahini, lemon juice, garlic and water for dressing. Assemble bowls."]},
-  {id:"l008",name:"Tuna Niçoise Salad",meal:"lunch",source:"BBC Good Food",sourceUrl:"https://www.bbcgoodfood.com",category:["fish","healthy","highProtein","quick"],cookTime:15,prepTime:10,image:"🐟",description:"Classic French salad with tuna steak, soft-boiled eggs, green beans, olives and a Dijon vinaigrette.",ingredients:[{item:"Tuna steak",qty:150,unit:"g",perServing:true},{item:"Eggs",qty:2,unit:"whole",perServing:true},{item:"Green beans",qty:80,unit:"g",perServing:true},{item:"Cherry tomatoes",qty:8,unit:"whole",perServing:true},{item:"Black olives",qty:10,unit:"whole",perServing:true},{item:"Little gem lettuce",qty:1,unit:"head",perServing:true},{item:"Dijon mustard",qty:1,unit:"tsp",perServing:false},{item:"Red wine vinegar",qty:1,unit:"tbsp",perServing:false},{item:"Olive oil",qty:3,unit:"tbsp",perServing:false}],nutrition:{calories:460,protein:45,carbs:12,fat:26,fibre:5},steps:["Boil eggs 6 mins, refresh in cold water and peel. Blanch green beans 3 mins.","Sear tuna steak in hot pan 2 mins each side. Rest and slice.","Whisk mustard, vinegar and olive oil. Assemble salad and drizzle dressing."]},
-  {id:"l009",name:"Black Bean & Sweet Potato Tacos",meal:"lunch",source:"The Happy Pear",sourceUrl:"https://thehappypear.ie",category:["vegetarian","vegan","quick","healthy"],cookTime:25,prepTime:10,image:"🌮",description:"Smoky roasted sweet potato and spiced black beans in warm corn tortillas with avocado crema.",ingredients:[{item:"Sweet potato",qty:300,unit:"g",perServing:false},{item:"Tinned black beans",qty:1,unit:"400g tin",perServing:false},{item:"Corn tortillas",qty:2,unit:"whole",perServing:true},{item:"Avocado",qty:1,unit:"whole",perServing:false},{item:"Lime",qty:1,unit:"whole",perServing:false},{item:"Smoked paprika",qty:1,unit:"tsp",perServing:false},{item:"Ground cumin",qty:1,unit:"tsp",perServing:false},{item:"Red onion",qty:0.5,unit:"whole",perServing:false},{item:"Coriander",qty:1,unit:"handful",perServing:false}],nutrition:{calories:480,protein:16,carbs:72,fat:14,fibre:16},steps:["Cube sweet potato, toss with paprika and oil, roast 200°C for 20 mins.","Season black beans with cumin, salt and lime juice. Heat in a pan.","Mash avocado with lime juice and salt. Warm tortillas, fill and top with coriander."]},
-  {id:"l010",name:"Miso Glazed Salmon Soba Noodles",meal:"lunch",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["fish","highProtein","healthy","quick"],cookTime:20,prepTime:10,image:"🍱",description:"Caramelised miso-glazed salmon served over soba noodles with pak choi and a ginger broth.",ingredients:[{item:"Salmon fillet",qty:150,unit:"g",perServing:true},{item:"Soba noodles",qty:90,unit:"g",perServing:true},{item:"Pak choi",qty:1,unit:"head",perServing:true},{item:"White miso paste",qty:1,unit:"tbsp",perServing:false},{item:"Mirin",qty:1,unit:"tbsp",perServing:false},{item:"Soy sauce",qty:2,unit:"tbsp",perServing:false},{item:"Fresh ginger",qty:20,unit:"g",perServing:false},{item:"Sesame oil",qty:1,unit:"tsp",perServing:false},{item:"Spring onions",qty:2,unit:"whole",perServing:false}],nutrition:{calories:530,protein:40,carbs:52,fat:16,fibre:4},steps:["Mix miso, mirin and soy for glaze. Coat salmon and bake 200°C for 12 mins.","Cook soba noodles per packet. Blanch pak choi in noodle water last 2 mins.","Simmer soy, ginger, sesame oil and 200ml water for broth. Serve salmon over noodles in broth."]},
-  {id:"l011",name:"Roast Chicken & Pesto Orzo",meal:"lunch",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["meat","quick","batchCook"],cookTime:20,prepTime:10,image:"🍝",description:"Leftover roast chicken tossed with orzo, homemade basil pesto, cherry tomatoes and pine nuts.",ingredients:[{item:"Orzo pasta",qty:80,unit:"g",perServing:true},{item:"Cooked chicken breast",qty:120,unit:"g",perServing:true},{item:"Basil pesto",qty:2,unit:"tbsp",perServing:true},{item:"Cherry tomatoes",qty:8,unit:"whole",perServing:true},{item:"Pine nuts",qty:1,unit:"tbsp",perServing:false},{item:"Parmesan",qty:20,unit:"g",perServing:false},{item:"Lemon",qty:0.5,unit:"whole",perServing:false},{item:"Baby spinach",qty:1,unit:"handful",perServing:false}],nutrition:{calories:560,protein:38,carbs:55,fat:20,fibre:4},steps:["Cook orzo in salted boiling water 8–9 mins, drain reserving a ladle of water.","Toast pine nuts in dry pan. Halve tomatoes.","Toss orzo with pesto, chicken, tomatoes, spinach and pasta water. Finish with parmesan."]},
-  {id:"l012",name:"Vibrant Beetroot & Feta Salad",meal:"lunch",source:"Ottolenghi",sourceUrl:"https://ottolenghi.co.uk",category:["vegetarian","healthy","quick"],cookTime:5,prepTime:10,image:"🫐",description:"Roasted beetroot, creamy feta, candied walnuts and peppery rocket with a honey-balsamic dressing.",ingredients:[{item:"Pre-cooked beetroot",qty:250,unit:"g",perServing:false},{item:"Feta cheese",qty:80,unit:"g",perServing:false},{item:"Rocket",qty:60,unit:"g",perServing:false},{item:"Walnuts",qty:30,unit:"g",perServing:false},{item:"Balsamic vinegar",qty:2,unit:"tbsp",perServing:false},{item:"Honey",qty:1,unit:"tsp",perServing:false},{item:"Olive oil",qty:2,unit:"tbsp",perServing:false},{item:"Orange",qty:0.5,unit:"whole",perServing:false}],nutrition:{calories:390,protein:14,carbs:28,fat:26,fibre:5},steps:["Toast walnuts with honey and a pinch of salt in dry pan 3 mins.","Whisk balsamic, olive oil, orange juice and season.","Arrange rocket and beetroot, crumble feta, scatter walnuts and drizzle dressing."]},
-  {id:"l013",name:"Spicy Kimchi Fried Rice",meal:"lunch",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["vegetarian","quick","healthy"],cookTime:15,prepTime:5,image:"🍳",description:"Quick kimchi fried rice with a fried egg, spring onion and toasted sesame — great for leftover rice.",ingredients:[{item:"Cooked day-old rice",qty:200,unit:"g",perServing:true},{item:"Kimchi",qty:80,unit:"g",perServing:true},{item:"Eggs",qty:2,unit:"whole",perServing:true},{item:"Soy sauce",qty:1,unit:"tbsp",perServing:false},{item:"Gochujang",qty:1,unit:"tbsp",perServing:false},{item:"Sesame oil",qty:1,unit:"tsp",perServing:false},{item:"Spring onions",qty:2,unit:"whole",perServing:false},{item:"Vegetable oil",qty:1,unit:"tbsp",perServing:false},{item:"Nori sheet",qty:1,unit:"whole",perServing:true}],nutrition:{calories:420,protein:18,carbs:60,fat:12,fibre:3},steps:["Fry kimchi in oil 2 mins. Add rice and press down to crisp.","Add gochujang and soy sauce, stir-fry 2 mins.","Push rice aside, fry eggs sunny-side up. Drizzle sesame oil, top with spring onion and torn nori."]},
-  {id:"l014",name:"White Bean & Chorizo Stew",meal:"lunch",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["meat","batchCook","highProtein"],cookTime:30,prepTime:10,image:"🥘",description:"Smoky Spanish-style white bean stew with cooking chorizo, tomatoes and wilted greens.",ingredients:[{item:"Cooking chorizo",qty:120,unit:"g",perServing:false},{item:"Tinned cannellini beans",qty:2,unit:"400g tins",perServing:false},{item:"Tinned chopped tomatoes",qty:1,unit:"400g tin",perServing:false},{item:"Cavolo nero / kale",qty:100,unit:"g",perServing:false},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Garlic cloves",qty:3,unit:"cloves",perServing:false},{item:"Smoked paprika",qty:1,unit:"tsp",perServing:false},{item:"Chicken stock",qty:300,unit:"ml",perServing:false},{item:"Crusty bread",qty:2,unit:"slices",perServing:true}],nutrition:{calories:550,protein:30,carbs:56,fat:20,fibre:14},steps:["Slice chorizo, fry in pot until oil releases. Remove chorizo.","Sauté onion and garlic in chorizo oil. Add paprika, tomatoes, beans and stock.","Simmer 15 mins. Add greens and chorizo last 5 mins. Serve with crusty bread."]},
-  {id:"d001",name:"Garlic Butter Chicken Thighs with Hasselback Potatoes",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["meat","highProtein"],cookTime:50,prepTime:15,image:"🍗",description:"Juicy skin-on chicken thighs roasted in garlic butter alongside crispy hasselback potatoes and herby greens.",ingredients:[{item:"Chicken thighs (skin-on)",qty:2,unit:"whole",perServing:true},{item:"Medium potatoes",qty:2,unit:"whole",perServing:true},{item:"Butter",qty:40,unit:"g",perServing:false},{item:"Garlic cloves",qty:4,unit:"cloves",perServing:false},{item:"Fresh thyme",qty:4,unit:"sprigs",perServing:false},{item:"Tenderstem broccoli",qty:100,unit:"g",perServing:true},{item:"Lemon",qty:1,unit:"whole",perServing:false},{item:"Olive oil",qty:1,unit:"tbsp",perServing:false}],nutrition:{calories:680,protein:44,carbs:52,fat:32,fibre:6},steps:["Score potatoes thinly (not all the way through). Drizzle with oil, roast 200°C for 25 mins.","Melt butter with crushed garlic and thyme. Baste potatoes, add chicken to tray.","Roast further 25 mins until chicken skin is golden and crispy.","Steam broccoli, squeeze lemon over everything and serve."]},
-  {id:"d002",name:"Prawn & Coconut Thai Green Curry",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["fish","quick","healthy"],cookTime:25,prepTime:10,image:"🍛",description:"Silky coconut Thai green curry with king prawns, aubergine and Thai basil over jasmine rice.",ingredients:[{item:"Raw king prawns",qty:200,unit:"g",perServing:false},{item:"Coconut milk",qty:1,unit:"400ml tin",perServing:false},{item:"Thai green curry paste",qty:3,unit:"tbsp",perServing:false},{item:"Jasmine rice",qty:80,unit:"g",perServing:true},{item:"Aubergine",qty:1,unit:"whole",perServing:false},{item:"Fish sauce",qty:1,unit:"tbsp",perServing:false},{item:"Brown sugar",qty:1,unit:"tsp",perServing:false},{item:"Thai basil",qty:1,unit:"handful",perServing:false},{item:"Lime",qty:1,unit:"whole",perServing:false},{item:"Vegetable oil",qty:1,unit:"tbsp",perServing:false}],nutrition:{calories:590,protein:35,carbs:58,fat:22,fibre:5},steps:["Fry curry paste in oil 2 mins. Add cubed aubergine, cook 3 mins.","Pour in coconut milk, fish sauce and sugar. Simmer 10 mins.","Add prawns, cook 3–4 mins until pink. Stir in Thai basil and lime juice.","Serve over jasmine rice."]},
-  {id:"d003",name:"Lamb Kofta with Flatbreads & Tzatziki",meal:"dinner",source:"Ottolenghi",sourceUrl:"https://ottolenghi.co.uk",category:["meat","highProtein"],cookTime:25,prepTime:20,image:"🥙",description:"Spiced lamb kofta skewers with sumac, cumin and parsley, served in flatbreads with tzatziki and pickled red onion.",ingredients:[{item:"Lamb mince",qty:250,unit:"g",perServing:false},{item:"Flatbreads",qty:2,unit:"whole",perServing:false},{item:"Greek yoghurt",qty:100,unit:"g",perServing:false},{item:"Cucumber",qty:0.5,unit:"whole",perServing:false},{item:"Red onion",qty:1,unit:"whole",perServing:false},{item:"Ground cumin",qty:1,unit:"tsp",perServing:false},{item:"Ground coriander",qty:1,unit:"tsp",perServing:false},{item:"Sumac",qty:1,unit:"tsp",perServing:false},{item:"Flat-leaf parsley",qty:1,unit:"handful",perServing:false},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false},{item:"Lemon",qty:1,unit:"whole",perServing:false},{item:"Red wine vinegar",qty:1,unit:"tbsp",perServing:false}],nutrition:{calories:640,protein:38,carbs:54,fat:28,fibre:4},steps:["Mix lamb with cumin, coriander, sumac, garlic and parsley. Shape onto skewers.","Pickle onion in vinegar and pinch of sugar for 15 mins.","Grill or griddle kofta 3–4 mins each side. Make tzatziki with yoghurt, grated cucumber and garlic.","Warm flatbreads, load with kofta, tzatziki and pickled onion."]},
-  {id:"d004",name:"One-Pan Lemon Orzo with Salmon",meal:"dinner",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["fish","quick","healthy","highProtein"],cookTime:25,prepTime:5,image:"🐠",description:"Orzo cooked in one pan with lemon, dill, capers and nestled salmon fillets — minimal washing up!",ingredients:[{item:"Salmon fillet",qty:150,unit:"g",perServing:true},{item:"Orzo pasta",qty:75,unit:"g",perServing:true},{item:"Chicken or fish stock",qty:400,unit:"ml",perServing:false},{item:"Capers",qty:1,unit:"tbsp",perServing:false},{item:"Lemon",qty:1,unit:"whole",perServing:false},{item:"Fresh dill",qty:1,unit:"handful",perServing:false},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false},{item:"Parmesan",qty:20,unit:"g",perServing:false},{item:"Butter",qty:15,unit:"g",perServing:false}],nutrition:{calories:560,protein:42,carbs:50,fat:20,fibre:3},steps:["Sauté garlic in butter. Add orzo and toast 1 min.","Pour in stock, lemon zest and capers. Simmer 8 mins stirring.","Nestle salmon fillets in orzo, cover and cook 6–8 mins. Finish with dill and parmesan."]},
-  {id:"d005",name:"Beef Tacos with Mango Salsa",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["meat","quick","highProtein"],cookTime:20,prepTime:15,image:"🌮",description:"Spiced crispy beef mince tacos with fresh mango salsa, soured cream and pickled jalapeños.",ingredients:[{item:"Beef mince",qty:250,unit:"g",perServing:false},{item:"Corn tortillas",qty:3,unit:"whole",perServing:true},{item:"Mango",qty:1,unit:"whole",perServing:false},{item:"Red onion",qty:0.5,unit:"whole",perServing:false},{item:"Coriander",qty:1,unit:"handful",perServing:false},{item:"Soured cream",qty:3,unit:"tbsp",perServing:false},{item:"Pickled jalapeños",qty:1,unit:"tbsp",perServing:false},{item:"Chilli powder",qty:1,unit:"tsp",perServing:false},{item:"Ground cumin",qty:1,unit:"tsp",perServing:false},{item:"Garlic powder",qty:0.5,unit:"tsp",perServing:false},{item:"Lime",qty:1,unit:"whole",perServing:false}],nutrition:{calories:650,protein:35,carbs:65,fat:26,fibre:7},steps:["Brown mince with spices until very crispy. Season well.","Dice mango, red onion and coriander, squeeze lime for salsa.","Warm tortillas, fill with beef, salsa, soured cream and jalapeños."]},
-  {id:"d006",name:"Mushroom & Walnut Bolognese",meal:"dinner",source:"The Happy Pear",sourceUrl:"https://thehappypear.ie",category:["vegetarian","vegan","batchCook","healthy"],cookTime:45,prepTime:15,image:"🍄",description:"A deeply savoury plant-based bolognese using blended mushrooms and walnuts, slow-cooked in red wine and tomatoes.",ingredients:[{item:"Chestnut mushrooms",qty:400,unit:"g",perServing:false},{item:"Walnuts",qty:80,unit:"g",perServing:false},{item:"Tinned chopped tomatoes",qty:2,unit:"400g tins",perServing:false},{item:"Red wine",qty:150,unit:"ml",perServing:false},{item:"Spaghetti",qty:80,unit:"g",perServing:true},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Carrot",qty:1,unit:"whole",perServing:false},{item:"Celery stalks",qty:2,unit:"stalks",perServing:false},{item:"Garlic cloves",qty:4,unit:"cloves",perServing:false},{item:"Tomato purée",qty:2,unit:"tbsp",perServing:false},{item:"Fresh thyme",qty:3,unit:"sprigs",perServing:false},{item:"Olive oil",qty:2,unit:"tbsp",perServing:false}],nutrition:{calories:570,protein:20,carbs:72,fat:22,fibre:10},steps:["Pulse mushrooms and walnuts in food processor until mince-like.","Sauté onion, carrot and celery in oil 10 mins. Add garlic and purée.","Add mushroom mixture, cook 10 mins until browned. Pour in wine and reduce.","Add tomatoes and thyme, simmer 20 mins. Serve over spaghetti."]},
-  {id:"d007",name:"Crispy Skin Sea Bass with Salsa Verde",meal:"dinner",source:"Ottolenghi",sourceUrl:"https://ottolenghi.co.uk",category:["fish","healthy","highProtein","quick"],cookTime:20,prepTime:15,image:"🐟",description:"Pan-fried sea bass with glass-crispy skin, served with vibrant Italian salsa verde and crushed new potatoes.",ingredients:[{item:"Sea bass fillets",qty:2,unit:"whole",perServing:false},{item:"New potatoes",qty:300,unit:"g",perServing:false},{item:"Flat-leaf parsley",qty:1,unit:"large handful",perServing:false},{item:"Basil",qty:0.5,unit:"handful",perServing:false},{item:"Capers",qty:2,unit:"tbsp",perServing:false},{item:"Anchovies",qty:3,unit:"whole",perServing:false},{item:"Dijon mustard",qty:1,unit:"tsp",perServing:false},{item:"Red wine vinegar",qty:1,unit:"tbsp",perServing:false},{item:"Extra virgin olive oil",qty:4,unit:"tbsp",perServing:false},{item:"Garlic cloves",qty:1,unit:"cloves",perServing:false}],nutrition:{calories:510,protein:38,carbs:34,fat:24,fibre:5},steps:["Boil potatoes until tender, crush with olive oil and season.","Blend parsley, basil, capers, anchovies, mustard, vinegar and oil for salsa verde.","Score fish skin, press flat in hot oiled pan skin-side down 4–5 mins, flip 1 min.","Serve fish over potatoes, spoon salsa verde generously."]},
-  {id:"d008",name:"Sticky Pork Belly with Egg Fried Rice",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["meat","batchCook"],cookTime:120,prepTime:15,image:"🥩",description:"Melt-in-your-mouth slow-cooked pork belly glazed in hoisin and honey, served with wok-fried egg rice.",ingredients:[{item:"Pork belly slices",qty:600,unit:"g",perServing:false},{item:"Hoisin sauce",qty:3,unit:"tbsp",perServing:false},{item:"Honey",qty:2,unit:"tbsp",perServing:false},{item:"Soy sauce",qty:2,unit:"tbsp",perServing:false},{item:"Five-spice powder",qty:1,unit:"tsp",perServing:false},{item:"Cooked day-old rice",qty:200,unit:"g",perServing:true},{item:"Eggs",qty:3,unit:"whole",perServing:false},{item:"Spring onions",qty:3,unit:"whole",perServing:false},{item:"Frozen peas",qty:80,unit:"g",perServing:false}],nutrition:{calories:780,protein:38,carbs:58,fat:40,fibre:4},steps:["Mix hoisin, honey, soy and five-spice. Coat pork, roast 180°C for 1.5 hrs, basting every 30 mins.","Crank to 220°C for final 15 mins to caramelise.","Wok-fry cold rice with beaten eggs, peas and soy until piping hot. Top with spring onion."]},
-  {id:"d009",name:"Chickpea & Spinach Curry",meal:"dinner",source:"The Happy Pear",sourceUrl:"https://thehappypear.ie",category:["vegetarian","vegan","batchCook","highProtein","healthy"],cookTime:30,prepTime:10,image:"🌿",description:"Fragrant, protein-rich chickpea and spinach curry made in 30 minutes. Serve with naan or rice.",ingredients:[{item:"Tinned chickpeas",qty:2,unit:"400g tins",perServing:false},{item:"Baby spinach",qty:150,unit:"g",perServing:false},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Garlic cloves",qty:3,unit:"cloves",perServing:false},{item:"Fresh ginger",qty:20,unit:"g",perServing:false},{item:"Tinned chopped tomatoes",qty:1,unit:"400g tin",perServing:false},{item:"Garam masala",qty:2,unit:"tsp",perServing:false},{item:"Ground turmeric",qty:0.5,unit:"tsp",perServing:false},{item:"Ground cumin",qty:1,unit:"tsp",perServing:false},{item:"Coconut milk",qty:200,unit:"ml",perServing:false},{item:"Basmati rice",qty:80,unit:"g",perServing:true},{item:"Naan bread",qty:1,unit:"whole",perServing:true}],nutrition:{calories:520,protein:22,carbs:78,fat:12,fibre:16},steps:["Sauté onion until golden. Add garlic, ginger and spices, cook 2 mins.","Add tomatoes and chickpeas. Simmer 15 mins.","Stir in coconut milk and spinach until wilted. Serve with rice and naan."]},
-  {id:"d010",name:"Spaghetti Aglio e Olio with Chilli Prawns",meal:"dinner",source:"Serious Eats",sourceUrl:"https://www.seriouseats.com",category:["fish","quick","highProtein"],cookTime:20,prepTime:5,image:"🍝",description:"Crispy garlic, chilli and parsley spaghetti topped with butter-basted prawns. Ready in 20 minutes.",ingredients:[{item:"Spaghetti",qty:80,unit:"g",perServing:true},{item:"Raw king prawns",qty:150,unit:"g",perServing:true},{item:"Garlic cloves",qty:5,unit:"cloves",perServing:false},{item:"Red chilli",qty:1,unit:"whole",perServing:false},{item:"Flat-leaf parsley",qty:1,unit:"large handful",perServing:false},{item:"Extra virgin olive oil",qty:5,unit:"tbsp",perServing:false},{item:"Butter",qty:20,unit:"g",perServing:false},{item:"Lemon",qty:0.5,unit:"whole",perServing:false}],nutrition:{calories:590,protein:38,carbs:62,fat:22,fibre:3},steps:["Cook spaghetti in very salted water. Reserve 2 ladles pasta water.","Gently fry sliced garlic and chilli in generous olive oil until golden (not burnt).","Add prawns, cook 2 mins. Toss in spaghetti with pasta water until silky.","Remove from heat, add butter, parsley and lemon juice."]},
-  {id:"d011",name:"Roasted Butternut Squash Risotto",meal:"dinner",source:"Ottolenghi",sourceUrl:"https://ottolenghi.co.uk",category:["vegetarian","healthy","batchCook"],cookTime:50,prepTime:15,image:"🎃",description:"Silky roasted butternut squash risotto with sage butter, toasted pumpkin seeds and parmesan.",ingredients:[{item:"Butternut squash",qty:600,unit:"g",perServing:false},{item:"Arborio rice",qty:150,unit:"g",perServing:false},{item:"Vegetable stock",qty:1,unit:"litre",perServing:false},{item:"Onion",qty:1,unit:"whole",perServing:false},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false},{item:"Parmesan",qty:50,unit:"g",perServing:false},{item:"Butter",qty:40,unit:"g",perServing:false},{item:"Dry white wine",qty:150,unit:"ml",perServing:false},{item:"Fresh sage",qty:8,unit:"leaves",perServing:false},{item:"Pumpkin seeds",qty:2,unit:"tbsp",perServing:false}],nutrition:{calories:580,protein:18,carbs:80,fat:20,fibre:8},steps:["Cube squash, roast at 200°C for 25 mins. Blitz half into purée.","Sauté onion and garlic in butter. Toast rice 1 min, add wine.","Add stock ladle by ladle stirring constantly for 18–20 mins.","Stir in squash purée, cubed squash and parmesan. Fry sage in butter to crisp, scatter with pumpkin seeds."]},
-  {id:"d012",name:"Chicken Tikka Masala",meal:"dinner",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["meat","batchCook","highProtein"],cookTime:40,prepTime:20,image:"🍛",description:"The nation's favourite — proper tikka masala with tender yoghurt-marinated chicken in a rich tomato-cream sauce.",ingredients:[{item:"Chicken breast",qty:600,unit:"g",perServing:false},{item:"Full-fat yoghurt",qty:150,unit:"g",perServing:false},{item:"Tinned chopped tomatoes",qty:2,unit:"400g tins",perServing:false},{item:"Double cream",qty:100,unit:"ml",perServing:false},{item:"Onions",qty:2,unit:"whole",perServing:false},{item:"Garlic cloves",qty:4,unit:"cloves",perServing:false},{item:"Fresh ginger",qty:30,unit:"g",perServing:false},{item:"Tikka masala paste",qty:3,unit:"tbsp",perServing:false},{item:"Garam masala",qty:1,unit:"tsp",perServing:false},{item:"Basmati rice",qty:80,unit:"g",perServing:true},{item:"Naan bread",qty:1,unit:"whole",perServing:true},{item:"Coriander",qty:1,unit:"handful",perServing:false}],nutrition:{calories:660,protein:48,carbs:72,fat:22,fibre:5},steps:["Marinate chicken in yoghurt and half the tikka paste for 30 mins (or overnight). Grill until charred.","Sauté onions until deep golden. Add garlic, ginger and remaining paste.","Add tomatoes, simmer 15 mins. Stir in cream and chicken.","Simmer 10 mins. Garnish with coriander. Serve with rice and naan."]},
-  {id:"d013",name:"Teriyaki Salmon with Sesame Greens",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["fish","quick","healthy","highProtein"],cookTime:20,prepTime:10,image:"🐡",description:"Sticky homemade teriyaki-glazed salmon fillet with sesame stir-fried pak choi and steamed rice.",ingredients:[{item:"Salmon fillet",qty:150,unit:"g",perServing:true},{item:"Soy sauce",qty:3,unit:"tbsp",perServing:false},{item:"Mirin",qty:2,unit:"tbsp",perServing:false},{item:"Honey",qty:1,unit:"tbsp",perServing:false},{item:"Pak choi",qty:2,unit:"heads",perServing:false},{item:"Sesame oil",qty:1,unit:"tbsp",perServing:false},{item:"Sesame seeds",qty:1,unit:"tbsp",perServing:false},{item:"Jasmine rice",qty:80,unit:"g",perServing:true},{item:"Garlic cloves",qty:2,unit:"cloves",perServing:false}],nutrition:{calories:540,protein:38,carbs:55,fat:18,fibre:4},steps:["Mix soy, mirin and honey. Marinate salmon 10 mins.","Pan-fry salmon skin-side up 3 mins, flip, pour remaining marinade and cook 3 mins until sticky.","Stir-fry pak choi with garlic and sesame oil 3 mins. Serve with rice, scatter sesame seeds."]},
-  {id:"d014",name:"Slow Cooker Beef Chilli",meal:"dinner",source:"Simple Home Edit",sourceUrl:"https://www.simplehomeedit.com",category:["meat","batchCook","highProtein"],cookTime:240,prepTime:20,image:"🌶️",description:"Deep, smoky beef chilli slow-cooked for hours with dark chocolate, kidney beans and a hint of cinnamon.",ingredients:[{item:"Beef mince",qty:500,unit:"g",perServing:false},{item:"Tinned kidney beans",qty:2,unit:"400g tins",perServing:false},{item:"Tinned chopped tomatoes",qty:2,unit:"400g tins",perServing:false},{item:"Beef stock",qty:200,unit:"ml",perServing:false},{item:"Dark chocolate",qty:20,unit:"g",perServing:false},{item:"Red onion",qty:1,unit:"whole",perServing:false},{item:"Garlic cloves",qty:3,unit:"cloves",perServing:false},{item:"Chilli powder",qty:2,unit:"tsp",perServing:false},{item:"Smoked paprika",qty:1,unit:"tsp",perServing:false},{item:"Ground cumin",qty:1,unit:"tsp",perServing:false},{item:"Cinnamon",qty:0.5,unit:"tsp",perServing:false},{item:"Basmati rice",qty:80,unit:"g",perServing:true},{item:"Soured cream",qty:2,unit:"tbsp",perServing:true}],nutrition:{calories:650,protein:42,carbs:70,fat:22,fibre:16},steps:["Brown mince with onion and garlic. Drain excess fat.","Transfer to slow cooker with all other ingredients except chocolate.","Cook on low 4–6 hrs. Stir in dark chocolate for last 30 mins.","Serve over rice with soured cream."]},
-  {id:"d015",name:"Roast Vegetable & Feta Frittata",meal:"dinner",source:"BBC Good Food",sourceUrl:"https://www.bbcgoodfood.com",category:["vegetarian","quick","healthy","highProtein"],cookTime:30,prepTime:10,image:"🥚",description:"Oven-finished frittata packed with roasted courgette, peppers, feta and fresh herbs. Delicious hot or cold.",ingredients:[{item:"Eggs",qty:6,unit:"whole",perServing:false},{item:"Feta cheese",qty:100,unit:"g",perServing:false},{item:"Courgette",qty:1,unit:"whole",perServing:false},{item:"Red pepper",qty:1,unit:"whole",perServing:false},{item:"Cherry tomatoes",qty:10,unit:"whole",perServing:false},{item:"Fresh basil",qty:1,unit:"handful",perServing:false},{item:"Olive oil",qty:2,unit:"tbsp",perServing:false},{item:"Double cream",qty:50,unit:"ml",perServing:false}],nutrition:{calories:380,protein:26,carbs:10,fat:28,fibre:3},steps:["Roast courgette and pepper at 200°C for 15 mins.","Whisk eggs with cream, season well.","Add roasted veg to an ovenproof pan, pour egg mixture, crumble feta and scatter tomatoes.","Cook on hob 2 mins, transfer to oven at 180°C for 12–15 mins until just set."]},
-  {id:"d016",name:"Lemon & Herb Roast Chicken",meal:"dinner",source:"Mob Kitchen",sourceUrl:"https://www.mob.co.uk",category:["meat","batchCook","highProtein"],cookTime:90,prepTime:20,image:"🍗",description:"A foolproof whole roast chicken with herb butter under the skin, stuffed with lemon and garlic, served with roasting juices.",ingredients:[{item:"Whole chicken",qty:1.5,unit:"kg",perServing:false},{item:"Butter",qty:60,unit:"g",perServing:false},{item:"Lemons",qty:2,unit:"whole",perServing:false},{item:"Garlic head",qty:1,unit:"whole",perServing:false},{item:"Fresh thyme",qty:6,unit:"sprigs",perServing:false},{item:"Fresh rosemary",qty:3,unit:"sprigs",perServing:false},{item:"Roasting potatoes",qty:600,unit:"g",perServing:false},{item:"Olive oil",qty:3,unit:"tbsp",perServing:false}],nutrition:{calories:620,protein:52,carbs:38,fat:28,fibre:4},steps:["Mix softened butter with chopped herbs and lemon zest. Push under chicken skin.","Stuff cavity with halved lemon and garlic head. Truss loosely.","Roast at 200°C for 1 hr 20 mins, resting 15 mins before carving.","Parboil potatoes, rough up edges, roast in chicken dripping until golden."]}
-];
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-box">&#127807;</div>
+    <span class="nav-brand">Chefly</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="home" onclick="showPage('home')">Recipes</button>
+    <button class="nav-tab" data-page="plan" onclick="showPage('plan')">Plan</button>
+    <button class="nav-tab" data-page="shop" onclick="showPage('shop')">Shopping</button>
+    <button class="nav-tab" data-page="saved" onclick="showPage('saved')">Saved <span id="fav-badge" class="badge" style="display:none">0</span></button>
+  </div>
+</nav>
 
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>What's for dinner?</h1>
+    <p>Browse recipes, build your weekly plan, and get your shopping list automatically.</p>
+  </div>
+  <div class="filter-row" id="home-filters">
+    <button class="filter-chip on-green" data-filter="all" onclick="toggleFilter(this,'all')">All</button>
+    <button class="filter-chip" data-filter="vegetarian" onclick="toggleFilter(this,'vegetarian')">Vegetarian</button>
+    <button class="filter-chip" data-filter="vegan" onclick="toggleFilter(this,'vegan')">Vegan</button>
+    <button class="filter-chip" data-filter="meat" onclick="toggleFilter(this,'meat')">Meat &amp; Fish</button>
+    <button class="filter-chip" data-filter="quick" onclick="toggleFilter(this,'quick')">Under 30 min</button>
+    <button class="filter-chip" data-filter="highProtein" onclick="toggleFilter(this,'highProtein')">High Protein</button>
+    <button class="filter-chip" data-filter="batchCook" onclick="toggleFilter(this,'batchCook')">Batch Cook</button>
+    <div class="servings-ctrl">
+      <button class="srv-btn" onclick="changeServings(-1)">&#8722;</button>
+      <span class="srv-num" id="srv-num">2</span>
+      <span class="srv-lbl">servings</span>
+      <button class="srv-btn" onclick="changeServings(1)">+</button>
+    </div>
+  </div>
+  <div class="section-hdr">
+    <h2>Lunch Ideas</h2>
+    <button class="link-btn" onclick="showPage('plan')">Build your plan &rarr;</button>
+  </div>
+  <div class="recipe-grid" id="grid-lunch"></div>
+  <div class="section-hdr">
+    <h2>Dinner Ideas</h2>
+    <button class="link-btn" onclick="showPage('plan')">Build your plan &rarr;</button>
+  </div>
+  <div class="recipe-grid" id="grid-dinner"></div>
+</div>
 
-const CATEGORIES = [
-  {id:"meat",label:"Meat",icon:"🥩"},
-  {id:"fish",label:"Fish & Seafood",icon:"🐟"},
-  {id:"vegetarian",label:"Vegetarian",icon:"🥦"},
-  {id:"vegan",label:"Vegan",icon:"🌱"},
-  {id:"quick",label:"Quick & Easy",icon:"⚡"},
-  {id:"batchCook",label:"Batch Cook",icon:"🫙"},
-  {id:"highProtein",label:"High Protein",icon:"💪"},
-  {id:"healthy",label:"Healthy",icon:"🥗"},
-];
+<!-- PLAN PAGE -->
+<div class="page" id="page-plan">
+  <div class="plan-top">
+    <div>
+      <h1>Weekly Plan</h1>
+      <p id="plan-desc">Plan your meals for the week ahead.</p>
+    </div>
+    <button class="gen-btn" id="gen-btn" onclick="generatePlan()">Generate Plan</button>
+  </div>
+  <div class="plan-pref">
+    <span class="pref-lbl">Filter by:</span>
+    <button class="filter-chip" data-pref="vegetarian" onclick="togglePref(this,'vegetarian')">Vegetarian</button>
+    <button class="filter-chip" data-pref="vegan" onclick="togglePref(this,'vegan')">Vegan</button>
+    <button class="filter-chip" data-pref="meat" onclick="togglePref(this,'meat')">Meat &amp; Fish</button>
+    <button class="filter-chip" data-pref="quick" onclick="togglePref(this,'quick')">Quick</button>
+    <button class="filter-chip" data-pref="highProtein" onclick="togglePref(this,'highProtein')">High Protein</button>
+  </div>
+  <div class="week-grid" id="week-grid"></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+    <button class="outline-btn" onclick="clearPlan()">Clear Plan</button>
+    <button class="outline-btn" onclick="showPage('shop')">View Shopping List</button>
+  </div>
+</div>
 
-const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+<!-- SHOPPING PAGE -->
+<div class="page" id="page-shop">
+  <div class="shop-top">
+    <div>
+      <h1>Shopping List</h1>
+      <p id="shop-subtitle">Based on your weekly meal plan.</p>
+    </div>
+    <div class="shop-top-btns">
+      <button class="outline-btn" onclick="clearChecked()">Clear checked</button>
+      <button class="outline-btn" onclick="copyList()">Copy list</button>
+    </div>
+  </div>
+  <div class="prog-row">
+    <div class="prog-track"><div class="prog-fill" id="shop-prog" style="width:0%"></div></div>
+    <span class="prog-lbl" id="shop-prog-lbl">0 / 0 items</span>
+  </div>
+  <div id="shop-content"></div>
+</div>
 
-const TAG_STYLES = {
-  meat:{bg:"rgba(248,113,113,0.12)",color:"#f87171"},
-  fish:{bg:"rgba(45,212,191,0.12)",color:"#2dd4bf"},
-  vegetarian:{bg:"rgba(74,222,128,0.12)",color:"#4ade80"},
-  vegan:{bg:"rgba(74,222,128,0.12)",color:"#4ade80"},
-  quick:{bg:"rgba(251,191,36,0.12)",color:"#fbbf24"},
-  batchCook:{bg:"rgba(124,106,247,0.15)",color:"#9d8fff"},
-  highProtein:{bg:"rgba(74,222,128,0.1)",color:"#4ade80"},
-  healthy:{bg:"rgba(45,212,191,0.12)",color:"#2dd4bf"},
-};
-const TAG_LABELS = {meat:"🥩 Meat",fish:"🐟 Fish",vegetarian:"🥦 Veg",vegan:"🌱 Vegan",quick:"⚡ Quick",batchCook:"🫙 Batch",highProtein:"💪 Protein",healthy:"🥗 Healthy"};
+<!-- SAVED PAGE -->
+<div class="page" id="page-saved">
+  <div class="section-hdr" style="margin-bottom:20px">
+    <h2>Saved Recipes</h2>
+    <button class="link-btn" onclick="clearFavourites()">Clear all</button>
+  </div>
+  <div id="saved-content"></div>
+</div>
 
-function fmtQty(qty) {
-  if (!qty) return '';
-  return Number.isInteger(qty) ? String(qty) : parseFloat(qty.toFixed(1)).toString();
-}
+<!-- MODAL -->
+<div class="overlay hidden" id="overlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <div class="modal-nav">
+      <button class="modal-back" onclick="closeModal()">&larr; Back</button>
+      <div class="modal-nav-actions">
+        <button class="modal-icon-btn" id="modal-fav-btn" onclick="modalToggleFav()" title="Save recipe">&#9825;</button>
+        <button class="modal-icon-btn" onclick="modalAddToPlan()" title="Add to plan">+Plan</button>
+      </div>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
 
-function filterRecipes(recipes, filters, ingredientText) {
-  let filtered = [...recipes];
-  const active = Object.entries(filters).filter(([,v])=>v).map(([k])=>k);
-  if (active.length > 0) filtered = filtered.filter(r => active.some(c => r.category.includes(c)));
-  if (ingredientText.trim()) {
-    const terms = ingredientText.toLowerCase().split(',').map(s=>s.trim()).filter(Boolean);
-    filtered = filtered.filter(r => terms.some(t => r.ingredients.some(i => i.item.toLowerCase().includes(t))));
+<div class="toast" id="toast"></div>
+
+<script>
+var RECIPES = [
+  {
+    id:'l001', meal:'lunch', name:'Smashed Cucumber Peanut Noodles',
+    emoji:'&#x1F952;', cat:['vegetarian','vegan','quick','highProtein'],
+    cook:15, prep:10, src:'Mob Kitchen',
+    desc:'Silky rice noodles tossed in a punchy sesame-peanut dressing with smashed cucumber, spring onion and chilli. Ready in 15 minutes.',
+    ings:[
+      {q:'100g',n:'rice noodles'},{q:'1',n:'cucumber'},
+      {q:'3 tbsp',n:'peanut butter'},{q:'2 tbsp',n:'soy sauce'},
+      {q:'1 tbsp',n:'sesame oil'},{q:'1 tbsp',n:'rice vinegar'},
+      {q:'2 cloves',n:'garlic, minced'},{q:'3',n:'spring onions'},
+      {q:'1',n:'red chilli'},{q:'1 tbsp',n:'sesame seeds'},{q:'1',n:'lime'}
+    ],
+    steps:[
+      'Cook rice noodles per packet instructions, drain and rinse cold.',
+      'Smash cucumber with a rolling pin, tear into chunks, salt and leave 5 mins then drain.',
+      'Whisk peanut butter, soy sauce, sesame oil, rice vinegar, garlic and lime juice.',
+      'Toss noodles and cucumber in dressing. Top with spring onion, chilli and sesame seeds.'
+    ],
+    nutr:{cal:420,pro:14,carb:58,fat:16},
+    shop:{Pantry:['rice noodles','peanut butter','soy sauce','sesame oil','rice vinegar','sesame seeds'],Produce:['cucumber','garlic','spring onions','red chilli','lime']}
+  },
+  {
+    id:'l002', meal:'lunch', name:'Roasted Pepper & Tomato Soup',
+    emoji:'&#x1FAD1;', cat:['vegetarian','vegan','batchCook'],
+    cook:35, prep:10, src:'BBC Good Food',
+    desc:'Deep, smoky roasted pepper and tomato soup. Perfect for batch cooking. Make a big pot and freeze for easy weekday lunches.',
+    ings:[
+      {q:'4',n:'red peppers'},{q:'2 tins',n:'chopped tomatoes'},
+      {q:'1',n:'onion'},{q:'1 bulb',n:'garlic'},
+      {q:'500ml',n:'vegetable stock'},{q:'1 tsp',n:'smoked paprika'},
+      {q:'2 tbsp',n:'olive oil'},{q:'2 slices',n:'sourdough bread'}
+    ],
+    steps:[
+      'Halve peppers, place with garlic and onion on a tray, drizzle oil, roast at 200C for 25 mins.',
+      'Squeeze garlic from skins, blend all roasted veg with tomatoes, stock and paprika.',
+      'Simmer 10 mins, season well. Serve with crusty sourdough.'
+    ],
+    nutr:{cal:280,pro:7,carb:42,fat:9},
+    shop:{Produce:['red peppers','onion','garlic'],Pantry:['tinned tomatoes','vegetable stock','smoked paprika','olive oil'],Bakery:['sourdough bread']}
+  },
+  {
+    id:'l003', meal:'lunch', name:'Chicken Caesar Wrap',
+    emoji:'&#x1F32F;', cat:['meat','quick','highProtein'],
+    cook:15, prep:10, src:'BBC Good Food',
+    desc:'Grilled chicken, crisp romaine, parmesan and a creamy Caesar dressing in a toasted flour tortilla.',
+    ings:[
+      {q:'150g',n:'chicken breast'},{q:'1 large',n:'flour tortilla'},
+      {q:'2 handfuls',n:'romaine lettuce'},{q:'20g',n:'parmesan'},
+      {q:'2 tbsp',n:'Caesar dressing'},{q:'1/2',n:'lemon'},{q:'1 tbsp',n:'olive oil'}
+    ],
+    steps:[
+      'Season chicken with garlic powder, salt and pepper. Pan-fry in olive oil 6-7 mins each side.',
+      'Slice chicken, toss with lettuce, parmesan, dressing and lemon juice.',
+      'Fill tortilla, fold and toast in a dry pan 1 min each side.'
+    ],
+    nutr:{cal:490,pro:42,carb:38,fat:18},
+    shop:{Meat:['chicken breast'],Dairy:['parmesan'],Produce:['romaine lettuce','lemon'],Bakery:['flour tortillas'],Pantry:['Caesar dressing','olive oil']}
+  },
+  {
+    id:'l004', meal:'lunch', name:'Halloumi & Sweet Potato Bowl',
+    emoji:'&#x1F9C0;', cat:['vegetarian','highProtein'],
+    cook:25, prep:10, src:'Ottolenghi',
+    desc:'Crispy halloumi with roasted sweet potato, rocket, pomegranate and a tahini-lemon dressing.',
+    ings:[
+      {q:'200g',n:'halloumi'},{q:'2',n:'sweet potatoes'},
+      {q:'2 handfuls',n:'rocket'},{q:'1/2',n:'pomegranate'},
+      {q:'2 tbsp',n:'tahini'},{q:'1',n:'lemon'},
+      {q:'1 tsp',n:'cumin'},{q:'2 tbsp',n:'olive oil'}
+    ],
+    steps:[
+      'Cube sweet potatoes, toss with cumin and olive oil, roast at 200C for 20 mins.',
+      'Slice halloumi and pan-fry until golden on both sides, about 2 mins each side.',
+      'Mix tahini with lemon juice and a splash of water to make dressing.',
+      'Assemble bowls with rocket, sweet potato, halloumi, pomegranate, then drizzle dressing.'
+    ],
+    nutr:{cal:540,pro:28,carb:44,fat:28},
+    shop:{Dairy:['halloumi'],Produce:['sweet potatoes','rocket','pomegranate','lemon'],Pantry:['tahini','cumin','olive oil']}
+  },
+  {
+    id:'l005', meal:'lunch', name:'Tuna Nicoise Salad',
+    emoji:'&#x1F957;', cat:['meat','highProtein','quick'],
+    cook:15, prep:10, src:'BBC Good Food',
+    desc:'Classic French salad with tuna, boiled eggs, green beans, olives and a sharp Dijon dressing.',
+    ings:[
+      {q:'2 tins',n:'tuna in olive oil'},{q:'4',n:'eggs'},
+      {q:'200g',n:'green beans'},{q:'150g',n:'cherry tomatoes'},
+      {q:'50g',n:'black olives'},{q:'2',n:'gem lettuces'},
+      {q:'1 tbsp',n:'Dijon mustard'},{q:'3 tbsp',n:'olive oil'},{q:'1 tbsp',n:'red wine vinegar'}
+    ],
+    steps:[
+      'Boil eggs for 7 mins, cool in cold water and halve. Blanch beans 3 mins.',
+      'Make dressing: whisk mustard, olive oil, vinegar, salt and pepper.',
+      'Arrange lettuce, tomatoes, beans, olives, tuna and eggs. Drizzle dressing.'
+    ],
+    nutr:{cal:380,pro:36,carb:12,fat:22},
+    shop:{Pantry:['tinned tuna','black olives','Dijon mustard','olive oil','red wine vinegar'],Produce:['green beans','cherry tomatoes','gem lettuces'],Dairy:['eggs']}
+  },
+  {
+    id:'l006', meal:'lunch', name:'Spicy Lentil & Coconut Soup',
+    emoji:'&#x1F375;', cat:['vegetarian','vegan','batchCook','highProtein'],
+    cook:30, prep:10, src:'Mob Kitchen',
+    desc:'Warming red lentil soup with coconut milk, ginger, turmeric and a squeeze of lime. Vegan and freezer-friendly.',
+    ings:[
+      {q:'200g',n:'red lentils'},{q:'1 tin',n:'coconut milk'},
+      {q:'1 litre',n:'vegetable stock'},{q:'1',n:'onion'},
+      {q:'3 cloves',n:'garlic'},{q:'2cm',n:'fresh ginger'},
+      {q:'1 tsp',n:'turmeric'},{q:'1 tsp',n:'cumin'},
+      {q:'1',n:'lime'},{q:'1 tbsp',n:'coconut oil'}
+    ],
+    steps:[
+      'Soften onion in coconut oil for 5 mins. Add garlic, ginger, turmeric and cumin, cook 2 mins.',
+      'Add lentils, stock and coconut milk. Simmer 20 mins until lentils are soft.',
+      'Blend half the soup for a creamy-chunky texture. Season and finish with lime juice.'
+    ],
+    nutr:{cal:320,pro:16,carb:48,fat:10},
+    shop:{Pantry:['red lentils','coconut milk','vegetable stock','turmeric','cumin','coconut oil'],Produce:['onion','garlic','ginger','lime']}
+  },
+  {
+    id:'d001', meal:'dinner', name:'Spaghetti Carbonara',
+    emoji:'&#x1F35D;', cat:['meat','quick','highProtein'],
+    cook:20, prep:10, src:'Mob Kitchen',
+    desc:'The real carbonara — no cream, just egg yolks, pecorino, guanciale and black pepper. Silky, rich and ready in 20 minutes.',
+    ings:[
+      {q:'100g',n:'spaghetti per person'},{q:'100g',n:'guanciale or pancetta'},
+      {q:'3',n:'egg yolks'},{q:'50g',n:'pecorino romano'},
+      {q:'50g',n:'parmesan'},{q:'1 tsp',n:'black pepper'}
+    ],
+    steps:[
+      'Boil spaghetti in well-salted water until al dente. Reserve 200ml pasta water.',
+      'Fry guanciale until crispy. Mix yolks with grated pecorino, parmesan and black pepper.',
+      'Off the heat, toss pasta with guanciale. Add egg mixture and splash of pasta water, toss vigorously.',
+      'Keep tossing and adding pasta water until sauce is creamy and glossy. Serve immediately.'
+    ],
+    nutr:{cal:680,pro:34,carb:72,fat:28},
+    shop:{Pasta:['spaghetti'],Meat:['guanciale or pancetta'],Dairy:['eggs','pecorino romano','parmesan']}
+  },
+  {
+    id:'d002', meal:'dinner', name:'Thai Green Chicken Curry',
+    emoji:'&#x1F35B;', cat:['meat','batchCook'],
+    cook:30, prep:15, src:'BBC Good Food',
+    desc:'Fragrant and creamy Thai green curry with tender chicken, courgette and aubergine. Serve with jasmine rice.',
+    ings:[
+      {q:'400g',n:'chicken thighs'},{q:'1 tin',n:'coconut milk'},
+      {q:'3 tbsp',n:'green curry paste'},{q:'200ml',n:'chicken stock'},
+      {q:'1',n:'courgette'},{q:'1',n:'aubergine'},
+      {q:'1 tbsp',n:'fish sauce'},{q:'1 tbsp',n:'palm sugar'},
+      {q:'200g',n:'jasmine rice'},{q:'1 handful',n:'Thai basil'},{q:'1',n:'lime'}
+    ],
+    steps:[
+      'Fry curry paste in a dry pan for 2 mins. Add coconut milk and stock, bring to simmer.',
+      'Add chicken and cook 15 mins. Add courgette and aubergine, cook 10 more mins.',
+      'Season with fish sauce and palm sugar. Cook rice separately.',
+      'Serve over rice with Thai basil and a squeeze of lime.'
+    ],
+    nutr:{cal:580,pro:38,carb:55,fat:22},
+    shop:{Meat:['chicken thighs'],Produce:['courgette','aubergine','Thai basil','lime'],Pantry:['coconut milk','green curry paste','chicken stock','fish sauce','palm sugar','jasmine rice']}
+  },
+  {
+    id:'d003', meal:'dinner', name:'Shakshuka',
+    emoji:'&#x1F373;', cat:['vegetarian','quick','highProtein'],
+    cook:25, prep:10, src:'Ottolenghi',
+    desc:'Eggs poached in a spiced tomato and pepper sauce. One-pan, quick, and endlessly satisfying. Serve with warm pitta.',
+    ings:[
+      {q:'2 tins',n:'chopped tomatoes'},{q:'2',n:'red peppers'},
+      {q:'1',n:'onion'},{q:'4 cloves',n:'garlic'},
+      {q:'4-6',n:'eggs'},{q:'2 tsp',n:'cumin'},
+      {q:'2 tsp',n:'paprika'},{q:'1 tsp',n:'chilli flakes'},
+      {q:'small bunch',n:'fresh coriander'},{q:'2',n:'pittas'}
+    ],
+    steps:[
+      'Soften onion and peppers in olive oil 8 mins. Add garlic and spices, cook 2 mins.',
+      'Add tomatoes, simmer 10 mins until slightly reduced. Season well.',
+      'Make wells in the sauce and crack in eggs. Cover and cook 8 mins until whites are set.',
+      'Scatter coriander and serve with warm pitta.'
+    ],
+    nutr:{cal:360,pro:22,carb:38,fat:14},
+    shop:{Pantry:['tinned tomatoes','cumin','paprika','chilli flakes','olive oil'],Produce:['red peppers','onion','garlic','coriander'],Dairy:['eggs'],Bakery:['pittas']}
+  },
+  {
+    id:'d004', meal:'dinner', name:'Salmon Teriyaki with Rice',
+    emoji:'&#x1F41F;', cat:['meat','quick','highProtein'],
+    cook:20, prep:10, src:'BBC Good Food',
+    desc:'Sticky teriyaki-glazed salmon with fluffy rice and tenderstem broccoli. A weeknight winner.',
+    ings:[
+      {q:'2',n:'salmon fillets'},{q:'3 tbsp',n:'soy sauce'},
+      {q:'2 tbsp',n:'mirin'},{q:'1 tbsp',n:'honey'},
+      {q:'1 tsp',n:'sesame oil'},{q:'200g',n:'jasmine rice'},
+      {q:'200g',n:'tenderstem broccoli'},{q:'1 tsp',n:'sesame seeds'},{q:'2',n:'spring onions'}
+    ],
+    steps:[
+      'Mix soy sauce, mirin, honey and sesame oil for teriyaki glaze.',
+      'Pan-fry salmon skin-side down 4 mins, flip, brush with glaze, cook 3 more mins.',
+      'Steam broccoli 4 mins. Cook rice per packet.',
+      'Serve salmon over rice with broccoli. Pour remaining glaze over and top with sesame seeds.'
+    ],
+    nutr:{cal:520,pro:44,carb:52,fat:16},
+    shop:{Meat:['salmon fillets'],Produce:['tenderstem broccoli','spring onions'],Pantry:['soy sauce','mirin','honey','sesame oil','jasmine rice','sesame seeds']}
+  },
+  {
+    id:'d005', meal:'dinner', name:'Mushroom & Spinach Lasagne',
+    emoji:'&#x1FAD9;', cat:['vegetarian','batchCook'],
+    cook:60, prep:20, src:'BBC Good Food',
+    desc:'Hearty vegetarian lasagne with a rich mushroom ragu, creamy bechamel and loads of parmesan. Perfect for batch cooking.',
+    ings:[
+      {q:'400g',n:'mixed mushrooms'},{q:'200g',n:'spinach'},
+      {q:'2 tins',n:'chopped tomatoes'},{q:'12 sheets',n:'lasagne sheets'},
+      {q:'50g',n:'parmesan'},{q:'50g',n:'butter'},
+      {q:'50g',n:'plain flour'},{q:'500ml',n:'whole milk'},
+      {q:'1',n:'onion'},{q:'3 cloves',n:'garlic'},{q:'1 tsp',n:'nutmeg'}
+    ],
+    steps:[
+      'Soften onion and garlic. Add mushrooms, cook until golden. Add tomatoes, simmer 15 mins. Wilt in spinach.',
+      'Make bechamel: melt butter, stir in flour, gradually add milk, season with nutmeg.',
+      'Layer: ragu, lasagne sheets, bechamel. Repeat twice. Top with bechamel and parmesan.',
+      'Bake at 190C for 35 mins until golden and bubbling.'
+    ],
+    nutr:{cal:620,pro:26,carb:68,fat:26},
+    shop:{Produce:['mixed mushrooms','spinach','onion','garlic'],Pantry:['tinned tomatoes','lasagne sheets','plain flour','nutmeg','olive oil'],Dairy:['parmesan','butter','whole milk']}
+  },
+  {
+    id:'d006', meal:'dinner', name:'Beef & Chickpea Tagine',
+    emoji:'&#x1FAD5;', cat:['meat','batchCook'],
+    cook:90, prep:20, src:'Ottolenghi',
+    desc:'Slow-cooked Moroccan stew with warming spices, dried apricots and chickpeas. Serve with couscous.',
+    ings:[
+      {q:'600g',n:'beef chuck, cubed'},{q:'1 tin',n:'chickpeas'},
+      {q:'2 tins',n:'chopped tomatoes'},{q:'100g',n:'dried apricots'},
+      {q:'2',n:'onions'},{q:'4 cloves',n:'garlic'},
+      {q:'2 tsp',n:'ras el hanout'},{q:'1 tsp',n:'cinnamon'},
+      {q:'300g',n:'couscous'},{q:'large bunch',n:'fresh coriander'}
+    ],
+    steps:[
+      'Brown beef in batches. Set aside. Soften onions, add garlic and spices.',
+      'Return beef, add tomatoes, chickpeas and apricots. Bring to boil.',
+      'Simmer covered for 1 hr 30 mins until beef is very tender.',
+      'Cook couscous, fluff with fork. Serve tagine over couscous with coriander.'
+    ],
+    nutr:{cal:640,pro:48,carb:58,fat:18},
+    shop:{Meat:['beef chuck'],Pantry:['tinned chickpeas','tinned tomatoes','dried apricots','ras el hanout','cinnamon','couscous'],Produce:['onions','garlic','coriander']}
+  },
+  {
+    id:'d007', meal:'dinner', name:'Prawn Pad Thai',
+    emoji:'&#x1F364;', cat:['meat','quick','highProtein'],
+    cook:20, prep:15, src:'Mob Kitchen',
+    desc:'Classic Thai street-food noodles with king prawns, egg, beansprouts and a tamarind sauce.',
+    ings:[
+      {q:'200g',n:'rice noodles'},{q:'200g',n:'king prawns'},
+      {q:'2',n:'eggs'},{q:'100g',n:'beansprouts'},
+      {q:'3 tbsp',n:'tamarind paste'},{q:'2 tbsp',n:'fish sauce'},
+      {q:'1 tbsp',n:'palm sugar'},{q:'3',n:'spring onions'},
+      {q:'50g',n:'roasted peanuts'},{q:'1',n:'lime'},{q:'2 cloves',n:'garlic'}
+    ],
+    steps:[
+      'Soak rice noodles in hot water 10 mins, drain.',
+      'Fry garlic in oil, add prawns and cook 2 mins. Push to side and scramble eggs.',
+      'Add noodles, tamarind, fish sauce and palm sugar. Toss everything together.',
+      'Add beansprouts and spring onions. Serve with peanuts, lime and chilli flakes.'
+    ],
+    nutr:{cal:480,pro:32,carb:58,fat:12},
+    shop:{Pantry:['rice noodles','tamarind paste','fish sauce','palm sugar','roasted peanuts'],Meat:['king prawns'],Produce:['beansprouts','spring onions','lime','garlic'],Dairy:['eggs']}
+  },
+  {
+    id:'d008', meal:'dinner', name:'Roasted Tomato & Burrata Pasta',
+    emoji:'&#x1F345;', cat:['vegetarian','quick'],
+    cook:25, prep:10, src:'Mob Kitchen',
+    desc:'Slow-roasted cherry tomatoes with burrata, fresh basil and rigatoni. Minimal effort, maximum flavour.',
+    ings:[
+      {q:'400g',n:'cherry tomatoes'},{q:'2',n:'burrata'},
+      {q:'400g',n:'rigatoni'},{q:'6 cloves',n:'garlic'},
+      {q:'large bunch',n:'fresh basil'},{q:'4 tbsp',n:'olive oil'},
+      {q:'1 tsp',n:'chilli flakes'},{q:'30g',n:'parmesan'}
+    ],
+    steps:[
+      'Roast cherry tomatoes with whole garlic cloves, olive oil and chilli at 200C for 20 mins.',
+      'Boil pasta until al dente. Reserve some pasta water.',
+      'Crush roasted tomatoes and garlic into a sauce. Toss with pasta and pasta water.',
+      'Serve topped with torn burrata, fresh basil and parmesan.'
+    ],
+    nutr:{cal:590,pro:24,carb:74,fat:22},
+    shop:{Pasta:['rigatoni'],Dairy:['burrata','parmesan'],Produce:['cherry tomatoes','garlic','basil'],Pantry:['olive oil','chilli flakes']}
   }
-  return filtered;
+];
+
+var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var MEAL_TYPES = ['lunch','dinner'];
+
+// STATE
+var st = {
+  servings: 2,
+  activeFilter: 'all',
+  prefs: [],
+  plan: {},
+  favourites: [],
+  checked: {}
+};
+var openRecipeId = null;
+
+try {
+  var saved = localStorage.getItem('chefly_v2');
+  if (saved) { var parsed = JSON.parse(saved); Object.assign(st, parsed); }
+} catch(e) {}
+
+function persist() {
+  try { localStorage.setItem('chefly_v2', JSON.stringify(st)); } catch(e) {}
 }
 
-function generateWeekPlan(filters, ingredientText) {
-  const shuffle = arr => [...arr].sort(()=>Math.random()-0.5);
-  const lunches = filterRecipes(RECIPES.filter(r=>r.meal==='lunch'), filters, ingredientText);
-  const dinners = filterRecipes(RECIPES.filter(r=>r.meal==='dinner'), filters, ingredientText);
-  const sl = shuffle(lunches.length ? lunches : RECIPES.filter(r=>r.meal==='lunch'));
-  const sd = shuffle(dinners.length ? dinners : RECIPES.filter(r=>r.meal==='dinner'));
-  return DAYS.map((day,i)=>({day, lunch:sl[i%sl.length]||null, dinner:sd[i%sd.length]||null}));
+function byId(id) {
+  for (var i = 0; i < RECIPES.length; i++) { if (RECIPES[i].id === id) return RECIPES[i]; }
+  return null;
+}
+function isFav(id) { return st.favourites.indexOf(id) !== -1; }
+function totalTime(r) { return r.cook + r.prep; }
+
+// NAV
+function showPage(page) {
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+  var tabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector('[data-page="' + page + '"]').classList.add('active');
+  if (page === 'shop') renderShop();
+  if (page === 'saved') renderSaved();
+  if (page === 'plan') renderPlan();
 }
 
-function buildShoppingList(weekPlan, servings) {
-  const totals = {};
-  weekPlan.forEach(({lunch,dinner}) => {
-    [lunch,dinner].forEach(recipe => {
-      if (!recipe) return;
-      recipe.ingredients.forEach(ing => {
-        const key = ing.item.toLowerCase() + '__' + ing.unit;
-        const qty = ing.perServing ? ing.qty * servings : ing.qty;
-        if (!totals[key]) totals[key] = {item:ing.item, qty:0, unit:ing.unit};
-        totals[key].qty += qty;
+// TOAST
+var toastTimer;
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 2200);
+}
+
+// SERVINGS
+function changeServings(d) {
+  st.servings = Math.max(1, Math.min(10, st.servings + d));
+  document.getElementById('srv-num').textContent = st.servings;
+  persist();
+}
+
+// FILTERS
+function toggleFilter(btn, filter) {
+  st.activeFilter = filter;
+  var chips = document.querySelectorAll('#home-filters .filter-chip');
+  for (var i = 0; i < chips.length; i++) { chips[i].classList.remove('on','on-green'); }
+  btn.classList.add('on-green');
+  renderGrids();
+}
+
+function togglePref(btn, pref) {
+  var idx = st.prefs.indexOf(pref);
+  if (idx === -1) st.prefs.push(pref);
+  else st.prefs.splice(idx, 1);
+  var chips = document.querySelectorAll('[data-pref]');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].classList.toggle('on', st.prefs.indexOf(chips[i].dataset.pref) !== -1);
+  }
+  persist();
+}
+
+function filteredRecipes(meal) {
+  return RECIPES.filter(function(r) {
+    if (r.meal !== meal) return false;
+    if (st.activeFilter === 'all') return true;
+    return r.cat.indexOf(st.activeFilter) !== -1;
+  });
+}
+
+// RECIPE CARD
+function recipeCard(r) {
+  var fav = isFav(r.id);
+  return '<div class="rcard" onclick="openRecipe(\'' + r.id + '\')">'
+    + '<div class="rcard-top">'
+    + '<span>' + r.emoji + '</span>'
+    + '<button class="rcard-fav" onclick="event.stopPropagation();toggleFav(\'' + r.id + '\')">' + (fav ? '&#10084;' : '&#9825;') + '</button>'
+    + '<span class="rcard-cat-dot">' + r.meal + '</span>'
+    + '</div>'
+    + '<div class="rcard-body">'
+    + '<div class="rcard-name">' + r.name + '</div>'
+    + '<div class="rcard-meta"><span>' + totalTime(r) + ' min</span><span>' + r.src + '</span></div>'
+    + '<div class="rcard-desc">' + r.desc + '</div>'
+    + '<div class="rcard-nutr">'
+    + '<div class="nutr-pill"><span class="nutr-pill-val">' + r.nutr.cal + '</span><span class="nutr-pill-lbl">kcal</span></div>'
+    + '<div class="nutr-pill"><span class="nutr-pill-val">' + r.nutr.pro + 'g</span><span class="nutr-pill-lbl">protein</span></div>'
+    + '<div class="nutr-pill"><span class="nutr-pill-val">' + r.nutr.carb + 'g</span><span class="nutr-pill-lbl">carbs</span></div>'
+    + '<div class="nutr-pill"><span class="nutr-pill-val">' + r.nutr.fat + 'g</span><span class="nutr-pill-lbl">fat</span></div>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderGrids() {
+  document.getElementById('grid-lunch').innerHTML = filteredRecipes('lunch').map(recipeCard).join('');
+  document.getElementById('grid-dinner').innerHTML = filteredRecipes('dinner').map(recipeCard).join('');
+}
+
+// FAVOURITES
+function toggleFav(id) {
+  var idx = st.favourites.indexOf(id);
+  if (idx === -1) { st.favourites.push(id); toast('Recipe saved!'); }
+  else { st.favourites.splice(idx, 1); toast('Removed from saved'); }
+  persist();
+  updateFavBadge();
+  renderGrids();
+  renderSaved();
+  if (openRecipeId === id) updateModalFavBtn();
+}
+
+function updateFavBadge() {
+  var badge = document.getElementById('fav-badge');
+  var count = st.favourites.length;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? 'flex' : 'none';
+}
+
+function clearFavourites() {
+  if (!st.favourites.length) return;
+  st.favourites = [];
+  persist();
+  updateFavBadge();
+  renderGrids();
+  renderSaved();
+  toast('Saved recipes cleared');
+}
+
+function renderSaved() {
+  var el = document.getElementById('saved-content');
+  if (!st.favourites.length) {
+    el.innerHTML = '<div class="saved-empty"><div class="saved-empty-icon">&#9825;</div><h2>No saved recipes yet</h2><p>Tap the heart on any recipe to save it here.</p></div>';
+    return;
+  }
+  var html = '<div class="saved-grid">';
+  for (var i = 0; i < st.favourites.length; i++) {
+    var r = byId(st.favourites[i]);
+    if (r) html += recipeCard(r);
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// PLAN
+function planKey(dayIdx, mealType) { return dayIdx + '_' + mealType; }
+
+function generatePlan() {
+  var btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  setTimeout(function() {
+    for (var d = 0; d < 7; d++) {
+      for (var m = 0; m < MEAL_TYPES.length; m++) {
+        var mealType = MEAL_TYPES[m];
+        var pool = RECIPES.filter(function(r) {
+          if (r.meal !== mealType) return false;
+          if (st.prefs.length === 0) return true;
+          for (var p = 0; p < st.prefs.length; p++) { if (r.cat.indexOf(st.prefs[p]) !== -1) return true; }
+          return false;
+        });
+        if (pool.length === 0) pool = RECIPES.filter(function(r) { return r.meal === mealType; });
+        var pick = pool[Math.floor(Math.random() * pool.length)];
+        st.plan[planKey(d, mealType)] = pick.id;
+      }
+    }
+    persist();
+    btn.disabled = false;
+    btn.textContent = 'Regenerate Plan';
+    renderPlan();
+    toast('Meal plan generated!');
+  }, 300);
+}
+
+function rerollSlot(dayIdx, mealType) {
+  var pool = RECIPES.filter(function(r) {
+    if (r.meal !== mealType) return false;
+    if (st.prefs.length === 0) return true;
+    for (var p = 0; p < st.prefs.length; p++) { if (r.cat.indexOf(st.prefs[p]) !== -1) return true; }
+    return false;
+  });
+  if (pool.length === 0) pool = RECIPES.filter(function(r) { return r.meal === mealType; });
+  var current = st.plan[planKey(dayIdx, mealType)];
+  var pick = pool[0];
+  if (pool.length > 1) {
+    var tries = 0;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; tries++; } while (pick.id === current && tries < 20);
+  }
+  st.plan[planKey(dayIdx, mealType)] = pick.id;
+  persist();
+  renderPlan();
+  toast('Swapped!');
+}
+
+function removePlanSlot(key) {
+  delete st.plan[key];
+  persist();
+  renderPlan();
+}
+
+function clearPlan() {
+  st.plan = {};
+  persist();
+  renderPlan();
+  toast('Plan cleared');
+}
+
+function getTodayIdx() {
+  var d = new Date().getDay();
+  return d === 0 ? 6 : d - 1;
+}
+
+function renderPlan() {
+  var today = getTodayIdx();
+  var planned = Object.keys(st.plan).length;
+  document.getElementById('plan-desc').textContent =
+    planned > 0 ? planned + ' meal' + (planned !== 1 ? 's' : '') + ' planned this week.' : 'Plan your meals for the week ahead.';
+
+  var chips = document.querySelectorAll('[data-pref]');
+  for (var i = 0; i < chips.length; i++) {
+    chips[i].classList.toggle('on', st.prefs.indexOf(chips[i].dataset.pref) !== -1);
+  }
+
+  var html = '';
+  for (var d = 0; d < 7; d++) {
+    html += '<div class="day-col">';
+    html += '<div class="day-hdr' + (d === today ? ' today' : '') + '">' + DAYS[d] + '</div>';
+    for (var m = 0; m < MEAL_TYPES.length; m++) {
+      var mealType = MEAL_TYPES[m];
+      var key = planKey(d, mealType);
+      var rid = st.plan[key];
+      var r = rid ? byId(rid) : null;
+      if (!r) {
+        html += '<div class="meal-slot empty"><div class="empty-slot-txt">' + mealType + '<br>&#8212;</div></div>';
+      } else {
+        var fav = isFav(r.id);
+        html += '<div class="meal-slot" onclick="openRecipe(\'' + r.id + '\')">'
+          + '<div class="meal-slot-emoji">' + r.emoji + '</div>'
+          + '<div class="meal-slot-body">'
+          + '<div class="meal-slot-type">' + mealType + '</div>'
+          + '<div class="meal-slot-name">' + r.name + '</div>'
+          + '</div>'
+          + '<div class="meal-slot-actions" onclick="event.stopPropagation()">'
+          + '<button class="slot-btn" onclick="toggleFav(\'' + r.id + '\')" title="Save">' + (fav ? '&#10084;' : '&#9825;') + '</button>'
+          + '<button class="slot-btn" onclick="rerollSlot(' + d + ',\'' + mealType + '\')" title="Swap">&#x21BA;</button>'
+          + '<button class="slot-btn" onclick="removePlanSlot(\'' + key + '\')" title="Remove">&#x2715;</button>'
+          + '</div></div>';
+      }
+    }
+    html += '</div>';
+  }
+  document.getElementById('week-grid').innerHTML = html;
+}
+
+// SHOPPING
+function buildShopList() {
+  var ids = [];
+  var vals = Object.values ? Object.values(st.plan) : Object.keys(st.plan).map(function(k){return st.plan[k];});
+  vals.forEach(function(id) { if (ids.indexOf(id) === -1) ids.push(id); });
+  var recipes = ids.map(byId).filter(Boolean);
+  if (!recipes.length) return null;
+  var cats = {};
+  recipes.forEach(function(r) {
+    Object.keys(r.shop).forEach(function(cat) {
+      if (!cats[cat]) cats[cat] = {};
+      r.shop[cat].forEach(function(item) {
+        cats[cat][item] = (cats[cat][item] || 0) + 1;
       });
     });
   });
-  const cats = [
-    {label:'🥩 Meat & Fish', test: s => /chicken|beef|lamb|pork|prawn|salmon|tuna|sea bass|chorizo|mince|anchov/.test(s)},
-    {label:'🥛 Dairy & Eggs', test: s => /egg|butter|cream|yoghurt|milk|parmesan|feta|halloumi|cheese/.test(s)},
-    {label:'🥦 Fresh Produce', test: s => /spinach|lettuce|rocket|kale|pak choi|spring onion|coriander|parsley|basil|thyme|rosemary|dill|sage|chilli|ginger|lemon|lime|orange|avocado|tomato|cucumber|courgette|pepper|onion|beetroot|broccoli|bean|pea|mango|squash|potato|carrot|celery|mushroom/.test(s)},
-    {label:'🫙 Tinned & Jarred', test: s => /tinned|beans|chickpea|lentil|tomato pur|pesto|kimchi|capers|olives|jalape|gochujang|miso|hoisin|fish sauce|curry paste|coconut milk/.test(s)},
-    {label:'🌾 Grains, Pasta & Rice', test: s => /rice|pasta|noodle|orzo|spaghetti|bulgur|arborio|bread|tortilla|pita|flatbread|naan|soba/.test(s)},
-    {label:'🫒 Oils, Condiments & Spices', test: s => /oil|vinegar|mustard|honey|sugar|cumin|coriander|paprika|turmeric|masala|spice|sumac|five.spice|cinnamon|chocolate|wine|stock|mirin|tahini|sesame seed|pine nut|walnut|pumpkin seed|soy sauce/.test(s)},
-  ];
-  const grouped = {};
-  cats.forEach(c => grouped[c.label] = []);
-  grouped['🛒 Other'] = [];
-  Object.values(totals).forEach(item => {
-    const lower = item.item.toLowerCase();
-    const cat = cats.find(c => c.test(lower));
-    grouped[cat ? cat.label : '🛒 Other'].push(item);
-  });
-  return grouped;
+  return {cats: cats, recipes: recipes};
 }
 
-// ─── COMPONENTS ───────────────────────────────────────────────────────────────
+function renderShop() {
+  var el = document.getElementById('shop-content');
+  var data = buildShopList();
+  if (!data) {
+    el.innerHTML = '<div class="shop-empty"><div class="shop-empty-icon">&#x1F6D2;</div><p>Add meals to your plan first, then your shopping list will appear here.</p></div>';
+    document.getElementById('shop-subtitle').textContent = 'Based on your weekly meal plan.';
+    document.getElementById('shop-prog').style.width = '0%';
+    document.getElementById('shop-prog-lbl').textContent = '0 / 0 items';
+    return;
+  }
+  document.getElementById('shop-subtitle').textContent =
+    data.recipes.length + ' recipe' + (data.recipes.length !== 1 ? 's' : '') + ' in your plan';
 
-function Header() {
-  return (
-    <header className="header">
-      <div className="header-inner">
-        <div className="header-logo">
-          <span className="logo-icon">🍽️</span>
-          <div>
-            <h1 className="header-title">Meal Planner</h1>
-            <p className="header-subtitle">Your personal chef & dietician</p>
-          </div>
-        </div>
-        <div className="header-meta">
-          <span className="header-badge">30 Curated Recipes</span>
-          <span className="header-badge">Full Nutrition Info</span>
-          <span className="header-badge">Smart Shopping List</span>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function FilterPanel({filters,setFilters,ingredientText,setIngredientText,servings,setServings,onGenerate}) {
-  const activeCount = Object.values(filters).filter(Boolean).length;
-  return (
-    <div className="filter-panel">
-      <div className="filter-section">
-        <div className="filter-section-header">
-          <span className="filter-section-title">Cooking For</span>
-        </div>
-        <div className="servings-control">
-          <button className="servings-btn" onClick={()=>setServings(s=>Math.max(1,s-1))}>−</button>
-          <div className="servings-display">
-            <span className="servings-num">{servings}</span>
-            <span className="servings-label">{servings===1?'person':'people'}</span>
-          </div>
-          <button className="servings-btn" onClick={()=>setServings(s=>Math.min(12,s+1))}>+</button>
-        </div>
-      </div>
-      <div className="filter-section">
-        <div className="filter-section-header">
-          <span className="filter-section-title">What's in Your Fridge?</span>
-        </div>
-        <textarea className="ingredient-input" placeholder="e.g. chicken, spinach, pasta..." value={ingredientText} onChange={e=>setIngredientText(e.target.value)} rows={3}/>
-        {ingredientText.trim() && (
-          <p className="ingredient-hint">Filtering by: <strong>{ingredientText.split(',').map(s=>s.trim()).filter(Boolean).join(', ')}</strong></p>
-        )}
-      </div>
-      <div className="filter-section">
-        <div className="filter-section-header">
-          <span className="filter-section-title">Dietary & Style</span>
-          {activeCount>0 && <button className="clear-btn" onClick={()=>setFilters({})}>Clear ({activeCount})</button>}
-        </div>
-        <div className="filter-grid">
-          {CATEGORIES.map(cat=>(
-            <button key={cat.id} className={"filter-chip"+(filters[cat.id]?' active':'')} onClick={()=>setFilters(p=>({...p,[cat.id]:!p[cat.id]}))}>
-              <span className="chip-icon">{cat.icon}</span>
-              <span className="chip-label">{cat.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="filter-actions">
-        <button className="generate-btn" onClick={onGenerate}><span>✨</span> Generate My Week</button>
-        {(activeCount>0||ingredientText.trim()) && <button className="clear-all-btn" onClick={()=>{setFilters({});setIngredientText('');}}>Reset all filters</button>}
-      </div>
-      <div className="filter-tip">
-        <span>💡</span>
-        <p>Mix filters to discover perfectly matched meals. <strong>Batch Cook</strong> recipes are great for Sunday prep!</p>
-      </div>
-    </div>
-  );
-}
-
-function RecipeCard({recipe,onReroll,onSelect,onFavourite,isFav,dayIndex,mealType}) {
-  if (!recipe) return <div className="recipe-card empty"><span className="empty-label">No match for filters</span></div>;
-  return (
-    <div className="recipe-card" onClick={()=>onSelect(recipe)}>
-      <div className="card-header">
-        <span className="card-emoji">{recipe.image}</span>
-        <div className="card-header-actions" onClick={e=>e.stopPropagation()}>
-          <button className={"fav-btn"+(isFav?' active':'')} onClick={()=>onFavourite(recipe)} title={isFav?'Remove favourite':'Save favourite'}>{isFav?'♥':'♡'}</button>
-          <button className="reroll-btn" onClick={()=>onReroll(dayIndex,mealType)} title="Swap this meal">🔀</button>
-        </div>
-      </div>
-      <div className="card-body">
-        <h4 className="card-title">{recipe.name}</h4>
-        <p className="card-source"><a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()}>{recipe.source}</a></p>
-        <div className="card-tags">
-          {recipe.category.slice(0,3).map(cat=>(
-            <span key={cat} className="card-tag" style={{background:TAG_STYLES[cat]?.bg||'rgba(255,255,255,0.06)',color:TAG_STYLES[cat]?.color||'#aaa'}}>{TAG_LABELS[cat]||cat}</span>
-          ))}
-        </div>
-        <div className="card-meta">
-          <span>⏱ {recipe.prepTime+recipe.cookTime}m</span>
-          <span>🔥 {recipe.nutrition.calories} kcal</span>
-        </div>
-        <div className="card-nutrition">
-          {[['Protein',recipe.nutrition.protein,'g','#4ade80','rgba(74,222,128,0.12)'],['Carbs',recipe.nutrition.carbs,'g','#fbbf24','rgba(251,191,36,0.12)'],['Fat',recipe.nutrition.fat,'g','#f87171','rgba(248,113,113,0.12)'],['Fibre',recipe.nutrition.fibre,'g','#2dd4bf','rgba(45,212,191,0.12)']].map(([lbl,val,unit,color,bg])=>(
-            <div key={lbl} className="nutr-pill" style={{background:bg}}>
-              <span className="nutr-pill-val" style={{color}}>{val}{unit}</span>
-              <span className="nutr-pill-lbl">{lbl}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WeekGrid({weekPlan,hasGenerated,onReroll,onSelect,onFavourite,isFav,servings,onGenerate}) {
-  if (!hasGenerated) return (
-    <div className="empty-state">
-      <div className="empty-state-inner">
-        <span className="empty-emoji">🍽️</span>
-        <h2 className="empty-title">Let's Plan Your Week</h2>
-        <p className="empty-desc">Set your preferences on the left, then hit <strong>Generate My Week</strong> to get 7 days of curated lunches and dinners.</p>
-        <button className="empty-cta" onClick={onGenerate}>✨ Generate My Week</button>
-      </div>
-    </div>
-  );
-  return (
-    <div>
-      <div className="week-grid-header">
-        <h2 className="week-grid-title">Your Week's Menu</h2>
-        <p className="week-grid-sub">Click any recipe for full details · 🔀 to swap · ♡ to save</p>
-      </div>
-      <div className="days-grid">
-        {weekPlan.map((day,i)=>(
-          <div key={day.day}>
-            <div className="day-label">{day.day.slice(0,3)}</div>
-            <div className="day-meals">
-              <div>
-                <span className="meal-type-label lunch">☀️ Lunch</span>
-                <RecipeCard recipe={day.lunch} onReroll={onReroll} onSelect={onSelect} onFavourite={onFavourite} isFav={day.lunch&&isFav(day.lunch.id)} dayIndex={i} mealType="lunch"/>
-              </div>
-              <div>
-                <span className="meal-type-label dinner">🌙 Dinner</span>
-                <RecipeCard recipe={day.dinner} onReroll={onReroll} onSelect={onSelect} onFavourite={onFavourite} isFav={day.dinner&&isFav(day.dinner.id)} dayIndex={i} mealType="dinner"/>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RecipeModal({recipe,onClose,isFav,onFavourite,servings}) {
-  useEffect(()=>{
-    const onKey = e=>{ if(e.key==='Escape') onClose(); };
-    document.addEventListener('keydown',onKey);
-    document.body.style.overflow='hidden';
-    return ()=>{ document.removeEventListener('keydown',onKey); document.body.style.overflow=''; };
-  },[onClose]);
-
-  const ingQty = (ing) => fmtQty(ing.perServing ? ing.qty*servings : ing.qty);
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e=>e.stopPropagation()}>
-        <button className="modal-close-btn" onClick={onClose}>✕</button>
-        <div className="modal-hero">
-          <span className="modal-emoji">{recipe.image}</span>
-          <div className="modal-hero-info">
-            <div className="modal-meal-tag">{recipe.meal==='lunch'?'☀️ Lunch':'🌙 Dinner'}</div>
-            <h2 className="modal-title">{recipe.name}</h2>
-            <p className="modal-source">From <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer">{recipe.source}</a></p>
-            <div className="modal-tags">
-              {recipe.category.map(cat=>(
-                <span key={cat} className="card-tag" style={{background:TAG_STYLES[cat]?.bg||'rgba(255,255,255,0.06)',color:TAG_STYLES[cat]?.color||'#aaa',fontSize:'11px',padding:'3px 8px'}}>{TAG_LABELS[cat]||cat}</span>
-              ))}
-            </div>
-          </div>
-          <button className={"modal-fav-btn"+(isFav?' active':'')} onClick={onFavourite}>{isFav?'♥':'♡'}</button>
-        </div>
-        <div className="modal-stats">
-          {[['⏱','Prep',recipe.prepTime+'m'],['🍳','Cook',recipe.cookTime+'m'],['🕐','Total',(recipe.prepTime+recipe.cookTime)+'m'],['🔥','kcal',recipe.nutrition.calories],['👥',servings===1?'Person':'People',servings]].map(([icon,lbl,val])=>(
-            <div key={lbl} className="modal-stat">
-              <span className="stat-icon">{icon}</span>
-              <div><div className="stat-val">{val}</div><div className="stat-lbl">{lbl}</div></div>
-            </div>
-          ))}
-        </div>
-        <p className="modal-desc">{recipe.description}</p>
-        <div className="modal-body">
-          <div className="modal-section">
-            <h3 className="modal-section-title">Ingredients</h3>
-            <p className="modal-section-sub">For {servings} {servings===1?'person':'people'}</p>
-            <ul className="ingredient-list">
-              {recipe.ingredients.map((ing,i)=>(
-                <li key={i} className="ingredient-item">
-                  <span className="ing-dot"/>
-                  <span>
-                    <span className="ing-qty">{ingQty(ing)}</span>{' '}
-                    <span className="ing-unit">{ing.unit}</span>{' '}
-                    <span className="ing-name">{ing.item}</span>
-                    {ing.perServing && <span className="per-srv">per person</span>}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="modal-section">
-            <h3 className="modal-section-title">Method</h3>
-            <p className="modal-section-sub">&nbsp;</p>
-            <ol className="steps-list">
-              {recipe.steps.map((step,i)=>(
-                <li key={i} className="step-item">
-                  <span className="step-num">{i+1}</span>
-                  <p className="step-text">{step}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="modal-section full">
-            <h3 className="modal-section-title">Nutrition per Serving</h3>
-            <div className="nutr-section">
-              <div className="cal-box">
-                <span className="cal-num">{recipe.nutrition.calories}</span>
-                <span className="cal-lbl">kcal / serving</span>
-              </div>
-              <div className="nutr-bars">
-                {[['Protein',recipe.nutrition.protein,60,'g','#4ade80'],['Carbohydrates',recipe.nutrition.carbs,100,'g','#fbbf24'],['Fat',recipe.nutrition.fat,60,'g','#f87171'],['Fibre',recipe.nutrition.fibre,30,'g','#2dd4bf']].map(([name,val,max,unit,color])=>(
-                  <div key={name}>
-                    <div className="nutr-row-hdr">
-                      <span className="nutr-name">{name}</span>
-                      <span className="nutr-val" style={{color}}>{val}{unit}</span>
-                    </div>
-                    <div className="nutr-bg"><div className="nutr-fill" style={{width:Math.min(100,(val/max)*100)+'%',background:color}}/></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ShoppingList({weekPlan,servings}) {
-  const [checked,setChecked] = useState({});
-  const [copied,setCopied] = useState(false);
-  if (!weekPlan) return (
-    <div className="empty-state"><div className="empty-state-inner">
-      <span className="empty-emoji">🛒</span>
-      <h2 className="empty-title">No Shopping List Yet</h2>
-      <p className="empty-desc">Generate your week plan first — your full shopping list will appear here.</p>
-    </div></div>
-  );
-  const shoppingList = buildShoppingList(weekPlan,servings);
-  const allItems = Object.values(shoppingList).flat();
-  const checkedCount = Object.values(checked).filter(Boolean).length;
-  const mealNames = [...new Set(weekPlan.flatMap(d=>[d.lunch,d.dinner]).filter(Boolean).map(r=>r.name))];
-
-  const copyList = () => {
-    const text = Object.entries(shoppingList).filter(([,v])=>v.length>0).map(([cat,items])=>
-      cat+'
-'+items.map(i=>'  • '+fmtQty(i.qty)+' '+i.unit+' '+i.item).join('
-')
-    ).join('
-
-');
-    navigator.clipboard.writeText(text).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); });
-  };
-
-  return (
-    <div className="shopping-list">
-      <div className="shopping-header">
-        <div>
-          <h2 className="shopping-title">Shopping List</h2>
-          <p className="shopping-sub">For {servings} {servings===1?'person':'people'} · {mealNames.length} meals</p>
-        </div>
-        <div className="shopping-actions">
-          <button className="copy-btn" onClick={copyList}>{copied?'✓ Copied!':'📋 Copy List'}</button>
-          {checkedCount>0 && <button className="clear-chk-btn" onClick={()=>setChecked({})}>Clear ticks ({checkedCount})</button>}
-        </div>
-      </div>
-      <div className="prog-wrap">
-        <div className="prog-track"><div className="prog-fill" style={{width:allItems.length>0?(checkedCount/allItems.length*100)+'%':'0%'}}/></div>
-        <span className="prog-lbl">{checkedCount}/{allItems.length}</span>
-      </div>
-      <div className="meal-summary">
-        <div className="meal-summary-title">This week's meals</div>
-        <div className="meal-summary-tags">{mealNames.map(n=><span key={n} className="meal-tag">{n}</span>)}</div>
-      </div>
-      <div className="shop-cats">
-        {Object.entries(shoppingList).filter(([,v])=>v.length>0).map(([cat,items])=>(
-          <div key={cat} className="shop-cat">
-            <div className="cat-title">{cat}</div>
-            <ul className="shop-items">
-              {items.map((item,i)=>{
-                const key=cat+item.item+i;
-                return (
-                  <li key={key} className={"shop-item"+(checked[key]?' checked':'')} onClick={()=>setChecked(p=>({...p,[key]:!p[key]}))}>
-                    <span className={"chkbox"+(checked[key]?' ticked':'')}>{checked[key]?'✓':''}</span>
-                    <span className="shop-item-name">{item.item}</span>
-                    <span className="shop-item-qty">{fmtQty(item.qty)} {item.unit}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </div>
-      <div className="shop-note">
-        <span>💡</span>
-        <p>Quantities are combined across all 7 days for {servings} {servings===1?'person':'people'}. Always check your cupboards first!</p>
-      </div>
-    </div>
-  );
-}
-
-function FavouritesPanel({favourites,onSelect,onRemove}) {
-  if (favourites.length===0) return (
-    <div className="empty-state"><div className="empty-state-inner">
-      <span className="empty-emoji">♡</span>
-      <h2 className="empty-title">No Favourites Yet</h2>
-      <p className="empty-desc">Hit <strong>♡</strong> on any recipe card to save it here for future weeks.</p>
-    </div></div>
-  );
-  const lunches = favourites.filter(r=>r.meal==='lunch');
-  const dinners = favourites.filter(r=>r.meal==='dinner');
-  const FavCard = ({recipe}) => (
-    <div className="fav-card" onClick={()=>onSelect(recipe)}>
-      <span className="fav-emoji">{recipe.image}</span>
-      <div className="fav-body">
-        <div className="fav-name">{recipe.name}</div>
-        <div className="fav-src">{recipe.source}</div>
-        <div className="fav-meta">
-          <span>⏱ {recipe.prepTime+recipe.cookTime}m</span>
-          <span>🔥 {recipe.nutrition.calories} kcal</span>
-          <span>💪 {recipe.nutrition.protein}g protein</span>
-        </div>
-      </div>
-      <button className="fav-remove" onClick={e=>{e.stopPropagation();onRemove(recipe);}} title="Remove">♥</button>
-    </div>
-  );
-  return (
-    <div>
-      <div className="fav-header">
-        <h2 className="fav-title">Your Favourites</h2>
-        <p className="fav-sub">{favourites.length} saved recipe{favourites.length!==1?'s':''} · Stored in your browser</p>
-      </div>
-      {lunches.length>0 && <div className="fav-section"><h3 className="fav-section-title">☀️ Lunches</h3><div className="fav-grid">{lunches.map(r=><FavCard key={r.id} recipe={r}/>)}</div></div>}
-      {dinners.length>0 && <div className="fav-section"><h3 className="fav-section-title">🌙 Dinners</h3><div className="fav-grid">{dinners.map(r=><FavCard key={r.id} recipe={r}/>)}</div></div>}
-    </div>
-  );
-}
-
-// ─── ROOT APP ─────────────────────────────────────────────────────────────────
-
-function App() {
-  const [activeTab,setActiveTab] = useState('Plan');
-  const [filters,setFilters] = useState({});
-  const [ingredientText,setIngredientText] = useState('');
-  const [servings,setServings] = useState(2);
-  const [weekPlan,setWeekPlan] = useState(null);
-  const [hasGenerated,setHasGenerated] = useState(false);
-  const [selectedRecipe,setSelectedRecipe] = useState(null);
-  const [favourites,setFavourites] = useState(()=>{
-    try { return JSON.parse(localStorage.getItem('mp_favs')||'[]'); } catch { return []; }
-  });
-
-  const handleGenerate = useCallback(()=>{
-    setWeekPlan(generateWeekPlan(filters,ingredientText));
-    setHasGenerated(true);
-    setActiveTab('Plan');
-  },[filters,ingredientText]);
-
-  const handleReroll = useCallback((dayIndex,mealType)=>{
-    setWeekPlan(prev=>{
-      if(!prev) return prev;
-      const pool = RECIPES.filter(r=>r.meal===mealType);
-      const active = Object.entries(filters).filter(([,v])=>v).map(([k])=>k);
-      const candidates = pool.filter(r=>{
-        if(active.length>0 && !active.some(c=>r.category.includes(c))) return false;
-        if(r.id===prev[dayIndex][mealType]?.id) return false;
-        return true;
-      });
-      if(!candidates.length) return prev;
-      const pick = candidates[Math.floor(Math.random()*candidates.length)];
-      return prev.map((d,i)=>i===dayIndex?{...d,[mealType]:pick}:d);
+  var total = 0, done = 0;
+  Object.keys(data.cats).forEach(function(cat) {
+    Object.keys(data.cats[cat]).forEach(function(item) {
+      total++;
+      if (st.checked[item]) done++;
     });
-  },[filters]);
+  });
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('shop-prog').style.width = pct + '%';
+  document.getElementById('shop-prog-lbl').textContent = done + ' / ' + total + ' items';
 
-  const toggleFav = useCallback((recipe)=>{
-    setFavourites(prev=>{
-      const next = prev.some(f=>f.id===recipe.id) ? prev.filter(f=>f.id!==recipe.id) : [...prev,recipe];
-      localStorage.setItem('mp_favs',JSON.stringify(next));
-      return next;
+  var html = '<div class="shop-cats">';
+  Object.keys(data.cats).sort().forEach(function(cat) {
+    var items = Object.keys(data.cats[cat]);
+    var catDone = items.filter(function(i) { return st.checked[i]; }).length;
+    html += '<div class="shop-cat">';
+    html += '<div class="shop-cat-hdr"><span>' + cat + '</span><span class="shop-cat-count">' + catDone + '/' + items.length + '</span></div>';
+    html += '<ul class="shop-items">';
+    items.forEach(function(item) {
+      var isDone = !!st.checked[item];
+      var times = data.cats[cat][item];
+      var safeItem = item.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      html += '<li class="shop-item' + (isDone ? ' done' : '') + '" onclick="toggleCheck(\'' + safeItem + '\')">'
+        + '<div class="chkbox' + (isDone ? ' on' : '') + '">' + (isDone ? '&#10003;' : '') + '</div>'
+        + '<span class="shop-item-name">' + item + '</span>'
+        + (times > 1 ? '<span class="shop-item-qty">x' + times + '</span>' : '')
+        + '</li>';
     });
-  },[]);
-
-  const isFav = useCallback((id)=>favourites.some(f=>f.id===id),[favourites]);
-
-  const TABS = ['Plan','Shopping List','Favourites'];
-
-  return (
-    <div className="app">
-      <Header/>
-      <div className="main-layout">
-        <aside className="sidebar">
-          <FilterPanel filters={filters} setFilters={setFilters} ingredientText={ingredientText} setIngredientText={setIngredientText} servings={servings} setServings={setServings} onGenerate={handleGenerate}/>
-        </aside>
-        <main className="content">
-          <nav className="tabs">
-            {TABS.map(tab=>(
-              <button key={tab} className={"tab-btn"+(activeTab===tab?' active':'')} onClick={()=>setActiveTab(tab)}>
-                {tab==='Favourites'&&favourites.length>0 && <span className="tab-badge">{favourites.length}</span>}
-                {tab}
-              </button>
-            ))}
-          </nav>
-          {activeTab==='Plan' && <WeekGrid weekPlan={weekPlan} hasGenerated={hasGenerated} onReroll={handleReroll} onSelect={setSelectedRecipe} onFavourite={toggleFav} isFav={isFav} servings={servings} onGenerate={handleGenerate}/>}
-          {activeTab==='Shopping List' && <ShoppingList weekPlan={weekPlan} servings={servings}/>}
-          {activeTab==='Favourites' && <FavouritesPanel favourites={favourites} onSelect={setSelectedRecipe} onRemove={toggleFav}/>}
-        </main>
-      </div>
-      {selectedRecipe && <RecipeModal recipe={selectedRecipe} onClose={()=>setSelectedRecipe(null)} isFav={isFav(selectedRecipe.id)} onFavourite={()=>toggleFav(selectedRecipe)} servings={servings}/>}
-    </div>
-  );
+    html += '</ul></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+function toggleCheck(item) {
+  if (st.checked[item]) delete st.checked[item];
+  else st.checked[item] = true;
+  persist();
+  renderShop();
+}
+
+function clearChecked() {
+  st.checked = {};
+  persist();
+  renderShop();
+  toast('Checks cleared');
+}
+
+function copyList() {
+  var data = buildShopList();
+  if (!data) { toast('No shopping list yet'); return; }
+  var text = 'Shopping List\n\n';
+  Object.keys(data.cats).sort().forEach(function(cat) {
+    text += cat + ':\n';
+    Object.keys(data.cats[cat]).forEach(function(item) { text += '  - ' + item + '\n'; });
+    text += '\n';
+  });
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { toast('Copied!'); }).catch(function() { toast('Copy failed'); });
+  } else { toast('Copy not supported in this browser'); }
+}
+
+// MODAL
+function openRecipe(id) {
+  var r = byId(id);
+  if (!r) return;
+  openRecipeId = id;
+  updateModalFavBtn();
+
+  var ingHtml = r.ings.map(function(i) {
+    return '<li class="ing-item"><div class="ing-dot"></div><span class="ing-qty">' + i.q + '</span><span class="ing-name">' + i.n + '</span></li>';
+  }).join('');
+
+  var stepsHtml = r.steps.map(function(s, idx) {
+    return '<li class="step-item"><div class="step-n">' + (idx+1) + '</div><span>' + s + '</span></li>';
+  }).join('');
+
+  document.getElementById('modal-content').innerHTML =
+    '<div class="modal-emoji">' + r.emoji + '</div>'
+    + '<div class="modal-body">'
+    + '<div class="modal-cat">' + r.meal.toUpperCase() + ' &bull; ' + r.cat.join(' &bull; ') + '</div>'
+    + '<div class="modal-title">' + r.name + '</div>'
+    + '<div class="modal-stats">'
+    + '<span class="modal-stat">&#9200; ' + totalTime(r) + ' min total</span>'
+    + '<span class="modal-stat">Prep: ' + r.prep + 'min</span>'
+    + '<span class="modal-stat">Cook: ' + r.cook + 'min</span>'
+    + '<span class="modal-stat">' + r.src + '</span>'
+    + '</div>'
+    + '<p class="modal-desc">' + r.desc + '</p>'
+    + '<div class="nutr-grid">'
+    + '<div class="nutr-box"><span class="nutr-box-val">' + r.nutr.cal + '</span><span class="nutr-box-lbl">calories</span></div>'
+    + '<div class="nutr-box"><span class="nutr-box-val">' + r.nutr.pro + 'g</span><span class="nutr-box-lbl">protein</span></div>'
+    + '<div class="nutr-box"><span class="nutr-box-val">' + r.nutr.carb + 'g</span><span class="nutr-box-lbl">carbs</span></div>'
+    + '<div class="nutr-box"><span class="nutr-box-val">' + r.nutr.fat + 'g</span><span class="nutr-box-lbl">fat</span></div>'
+    + '</div>'
+    + '<div class="modal-cols">'
+    + '<div class="modal-section"><h3>Ingredients <span>for ' + st.servings + ' serving' + (st.servings!==1?'s':'') + '</span></h3><ul class="ing-list">' + ingHtml + '</ul></div>'
+    + '<div class="modal-section"><h3>Method</h3><ol class="steps-list">' + stepsHtml + '</ol></div>'
+    + '</div>'
+    + '<button class="add-plan-btn" onclick="modalAddToPlan()">Add to Plan</button>'
+    + '</div>';
+
+  document.getElementById('overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+  openRecipeId = null;
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+function updateModalFavBtn() {
+  if (!openRecipeId) return;
+  var fav = isFav(openRecipeId);
+  var btn = document.getElementById('modal-fav-btn');
+  btn.textContent = fav ? '\u2764' : '\u2661';
+  btn.style.color = fav ? '#e53935' : '';
+}
+
+function modalToggleFav() {
+  if (openRecipeId) toggleFav(openRecipeId);
+}
+
+function modalAddToPlan() {
+  if (!openRecipeId) return;
+  var r = byId(openRecipeId);
+  var placed = false;
+  for (var d = 0; d < 7; d++) {
+    var key = planKey(d, r.meal);
+    if (!st.plan[key]) {
+      st.plan[key] = r.id;
+      placed = true;
+      persist();
+      toast('Added to ' + DAYS[d] + '!');
+      renderPlan();
+      break;
+    }
+  }
+  if (!placed) toast('All ' + r.meal + ' slots are filled');
+  closeModal();
+  showPage('plan');
+}
+
+// INIT
+document.getElementById('srv-num').textContent = st.servings;
+updateFavBadge();
+renderGrids();
+renderPlan();
 </script>
 </body>
 </html>
