@@ -1143,6 +1143,7 @@ function poolForMeal(mt){
   });
   if(!pool.length) pool = RECIPES.filter(function(r){ return r.meal===mt; });
   // Boost score for recipes using myIngredients
+  pool = shuffle(pool); // shuffle first so ties are broken randomly
   if(st.myIngredients.length){
     pool.sort(function(a,b){
       var sa=0,sb=0;
@@ -1150,11 +1151,6 @@ function poolForMeal(mt){
       b.ings.forEach(function(i){ st.myIngredients.forEach(function(mi){ if(i.n.toLowerCase().indexOf(mi)!==-1) sb++; }); });
       return sb-sa;
     });
-    // mix: top half of scored + rest random
-    var top = pool.slice(0, Math.max(1,Math.floor(pool.length/2)));
-    pool = top.concat(shuffle(pool.slice(top.length)));
-  } else {
-    pool = shuffle(pool);
   }
   return pool;
 }
@@ -1177,14 +1173,7 @@ function generatePlan(){
       // Each recipe spans 2 days (cook + 1 leftover) unless it has batchCook,
       // in which case it spans 3 days (cook + 2 leftovers).
       ['dinner','lunch'].forEach(function(mt){
-        var pool = RECIPES.filter(function(r){
-          if(r.meal!==mt) return false;
-          if(!st.prefs.length) return true;
-          for(var p=0;p<st.prefs.length;p++) if(r.cat.indexOf(st.prefs[p])!==-1) return true;
-          return false;
-        });
-        if(!pool.length) pool = RECIPES.filter(function(r){ return r.meal===mt; });
-        pool = shuffle(pool);
+        var pool = poolForMeal(mt);
         var day=0, poolIdx=0, lastId=null;
         while(day<7){
           // Pick next recipe, avoiding repeating the previous one
@@ -1234,13 +1223,7 @@ function generatePlan(){
 }
 
 function rerollSlot(d, mt){
-  var pool = RECIPES.filter(function(r){
-    if(r.meal!==mt) return false;
-    if(st.prefs.length===0) return true;
-    for(var p=0;p<st.prefs.length;p++) if(r.cat.indexOf(st.prefs[p])!==-1) return true;
-    return false;
-  });
-  if(!pool.length) pool = RECIPES.filter(function(r){ return r.meal===mt; });
+  var pool = poolForMeal(mt);
   var cur = st.plan[planKey(d,mt)], pick = pool[0], tries=0;
   if(pool.length>1) { do { pick=pool[Math.floor(Math.random()*pool.length)]; tries++; } while(pick.id===cur && tries<20); }
   st.plan[planKey(d,mt)] = pick.id; persist(); renderPlan(); toast('Swapped!');
