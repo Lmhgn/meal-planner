@@ -301,7 +301,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
           <span class="ms text-[18px]">shopping_cart</span> Shopping List
         </button>
         <button id="gen-btn" onclick="generatePlan()" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 font-bold rounded-lg hover:bg-slate-50 transition-all text-sm">
-          <span class="ms text-[18px]">shuffle</span> Generate Plan
+          <span class="ms text-[18px]">casino</span> Reroll Meals
         </button>
         <button onclick="openSidebar()" class="flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">
           <span class="ms text-[18px]">menu_book</span> Recipe Library
@@ -1135,10 +1135,11 @@ function shuffle(arr){
 function generatePlan(){
   var btn = document.getElementById('gen-btn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="ms text-[18px] animate-spin">progress_activity</span> Generating...';
+  btn.innerHTML = '<span class="ms text-[18px] animate-spin">progress_activity</span> Rerolling...';
   setTimeout(function(){
     st.plan={}; st.leftovers={};
-    var useLeftovers = !!st.leftoversOn;
+    var batchCookActive = st.prefs.indexOf('batchCook')!==-1;
+    var useLeftovers = !!st.leftoversOn || batchCookActive;
 
     if(useLeftovers){
       // Fill each meal type day-by-day.
@@ -1187,7 +1188,7 @@ function generatePlan(){
 
     persist();
     btn.disabled = false;
-    btn.innerHTML = '<span class="ms text-[18px]">shuffle</span> Regenerate';
+    btn.innerHTML = '<span class="ms text-[18px]">casino</span> Reroll Meals';
     renderPlan();
     var tip = st.leftoversOn ? 'Plan generated with leftovers! 🍱' : 'Meal plan generated!';
     toast(tip);
