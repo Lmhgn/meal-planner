@@ -1352,6 +1352,9 @@ function dragStartSidebar(e, el){
   e.dataTransfer.setData('text/plain', 'sidebar:'+_dragRid);
   setTimeout(function(){
     el.classList.add('dragging');
+    // Slide sidebar off-screen so Sunday column is fully accessible
+    var sb = document.getElementById('recipe-sidebar');
+    if(sb) sb.style.transform = 'translateX(100%)';
     var bd = document.getElementById('sb-backdrop');
     if(bd) bd.classList.add('hidden');
   }, 0);
@@ -1359,6 +1362,9 @@ function dragStartSidebar(e, el){
 function dragEndSidebar(el){
   el.classList.remove('dragging');
   document.querySelectorAll('.plan-slot').forEach(function(s){ s.classList.remove('drop-target'); });
+  // Slide sidebar back
+  var sb = document.getElementById('recipe-sidebar');
+  if(sb) sb.style.transform = '';
   var bd = document.getElementById('sb-backdrop');
   if(bd) bd.classList.remove('hidden');
 }
