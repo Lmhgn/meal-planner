@@ -1352,9 +1352,9 @@ function dragStartSidebar(e, el){
   e.dataTransfer.setData('text/plain', 'sidebar:'+_dragRid);
   setTimeout(function(){
     el.classList.add('dragging');
-    // Slide sidebar off-screen so Sunday column is fully accessible
+    // Remove .open so the sidebar slides off-screen (inline style translateX(100%) takes effect)
     var sb = document.getElementById('recipe-sidebar');
-    if(sb) sb.style.transform = 'translateX(100%)';
+    if(sb) sb.classList.remove('open');
     var bd = document.getElementById('sb-backdrop');
     if(bd) bd.classList.add('hidden');
   }, 0);
@@ -1364,7 +1364,7 @@ function dragEndSidebar(el){
   document.querySelectorAll('.plan-slot').forEach(function(s){ s.classList.remove('drop-target'); });
   // Slide sidebar back
   var sb = document.getElementById('recipe-sidebar');
-  if(sb) sb.style.transform = '';
+  if(sb) sb.classList.add('open');
   var bd = document.getElementById('sb-backdrop');
   if(bd) bd.classList.remove('hidden');
 }
