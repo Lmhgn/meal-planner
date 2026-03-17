@@ -1444,6 +1444,61 @@ function addQtys(list){
   return parts.join(' + ');
 }
 
+// ── INGREDIENT NORMALISATION ─────────────────────────────────────────────────
+// Maps any ingredient name variant to a single canonical shopping-list name.
+// Rules applied in order:
+//   1. Lowercase + trim
+//   2. Strip cooking-state prefixes (cooked, raw, fresh, frozen, …)
+//   3. Strip trailing descriptors (, diced / , boneless / fillets / …)
+//   4. Explicit canonical overrides
+var _ING_CANONICAL = {
+  // Chicken
+  'chicken':                    'chicken breast',
+  'chicken breasts':            'chicken breast',
+  'large chicken breast':       'chicken breast',
+  'chicken breasts, sliced thin':'chicken breast',
+  'chicken thigh':              'chicken thighs',
+  'chicken thighs, diced':      'chicken thighs',
+  'chicken thighs, boneless':   'chicken thighs',
+  'chicken thighs boneless':    'chicken thighs',
+  'chicken pieces':             'chicken thighs',
+  // Prawns
+  'king prawn':                 'king prawns',
+  'tiger prawn':                'king prawns',
+  'tiger prawns':               'king prawns',
+  // Tuna
+  'tuna in olive oil':          'tinned tuna',
+  'tuna in spring water':       'tinned tuna',
+  'tinned tuna in oil':         'tinned tuna',
+  'tuna cans':                  'tinned tuna',
+  'tuna steaks':                'tinned tuna',
+  // Salmon
+  'salmon fillet':              'salmon fillets',
+  // Cod
+  'cod or haddock fillets':     'cod fillets',
+  'cod fillet':                 'cod fillets',
+  // Beef
+  'beef mince or chicken mince':'beef mince',
+  'beef or chicken mince':      'beef mince',
+  // Pork
+  'good pork sausages':         'pork sausages',
+  // Stock
+  'lamb or chicken stock':      'chicken stock',
+  'beef or chicken stock':      'chicken stock',
+  'beef-style stock':           'beef stock',
+};
+function normaliseIngredient(name){
+  var s = name.toLowerCase().trim();
+  // Strip leading cooking-state words
+  s = s.replace(/^(cooked|raw|fresh|frozen|smoked|dried|tinned|canned|leftover|rotisserie)\s+/, '');
+  // Strip trailing comma-separated descriptors  (", diced", ", boneless skin-on", …)
+  s = s.replace(/,\s*(diced|sliced|shredded|boneless|skin.?on|bone.?in|chunks?|strips?|pieces?|thin|thick|large|small|trimmed|rinsed).*$/, '');
+  // Strip standalone trailing descriptor words after a space
+  s = s.replace(/\s+(fillets?|steaks?|pieces?|chunks?|strips?|slices?|rashers?|lardons?)$/, '');
+  s = s.trim();
+  return _ING_CANONICAL[s] || s;
+}
+
 // SHOPPING
 function buildShopList(){
   // Build plan usage: {rid -> usageCount}
@@ -1466,12 +1521,20 @@ function buildShopList(){
     // Map shop categories to ingredient quantities
     Object.keys(r.shop).forEach(function(cat){
       if(!cats[cat]) cats[cat]={};
-      r.shop[cat].forEach(function(shopItem){
+      r.shop[cat].forEach(function(rawItem){
+        // Normalise the shop item name before using it as a key
+        var shopItem = normaliseIngredient(rawItem);
         if(!cats[cat][shopItem]) cats[cat][shopItem]={ qtys:[], recipes:[], servingMult: buyMult };
-        // Find matching ingredient quantities
+        // Find matching ingredient quantities — match against both raw and normalised names
+        var normItem = shopItem;
         var matched = r.ings.filter(function(ing){
-          return ing.n.toLowerCase().indexOf(shopItem.toLowerCase())!==-1 ||
-                 shopItem.toLowerCase().indexOf(ing.n.toLowerCase())!==-1;
+          var ingN  = ing.n.toLowerCase();
+          var normN = normaliseIngredient(ing.n);
+          return normN === normItem ||
+                 ingN.indexOf(rawItem.toLowerCase())!==-1 ||
+                 rawItem.toLowerCase().indexOf(ingN)!==-1 ||
+                 normN.indexOf(normItem)!==-1 ||
+                 normItem.indexOf(normN)!==-1;
         });
         matched.forEach(function(ing){
           var q = parseQty(ing.q);
@@ -1491,7 +1554,7 @@ function buildShopList(){
   var seen = {}; // normalised name -> { cat, item }
   Object.keys(cats).forEach(function(cat){
     Object.keys(cats[cat]).slice().forEach(function(item){
-      var norm = item.toLowerCase().replace(/s$/, ''); // simple singular form
+      var norm = normaliseIngredient(item); // full smart normalisation
       if(seen[norm]){
         var ref = seen[norm];
         // Merge quantities and recipe credits into the first-seen entry
