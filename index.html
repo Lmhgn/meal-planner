@@ -408,7 +408,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
   <div id="sb-list" class="flex-1 overflow-y-auto px-3 py-3"></div>
 </div>
 <!-- Sidebar backdrop -->
-<div id="sb-backdrop" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[140] hidden" onclick="closeSidebar()"></div>
+<div id="sb-backdrop" class="fixed inset-0 z-[140] hidden" onclick="closeSidebar()"></div>
 
 <!-- TOAST -->
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-semibold shadow-xl transition-all duration-300 z-[300] pointer-events-none whitespace-nowrap"></div>
@@ -1348,12 +1348,10 @@ function renderSidebar(){
 function dragStartSidebar(e, el){
   _dragKey = null;
   _dragRid = el.dataset.rid;
-  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', 'sidebar:'+_dragRid);
   setTimeout(function(){
     el.classList.add('dragging');
-    // Hide the backdrop entirely during drag so calendar slots can receive drop events
-    // (backdrop-blur creates a compositing layer that blocks drag events even with pointer-events:none)
     var bd = document.getElementById('sb-backdrop');
     if(bd) bd.classList.add('hidden');
   }, 0);
