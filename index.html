@@ -318,6 +318,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
       <button class="pref-chip flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium transition-all border-2 border-slate-200 bg-white text-slate-700 hover:border-primary hover:bg-primary/10" data-pref="fish" onclick="togglePref(this,'fish')"><span class="ms text-[16px]">set_meal</span>Fish</button>
       <button class="pref-chip flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium transition-all border-2 border-slate-200 bg-white text-slate-700 hover:border-primary hover:bg-primary/10" data-pref="quick" onclick="togglePref(this,'quick')"><span class="ms text-[16px]">timer</span>Quick</button>
       <button class="pref-chip flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium transition-all border-2 border-slate-200 bg-white text-slate-700 hover:border-primary hover:bg-primary/10" data-pref="highProtein" onclick="togglePref(this,'highProtein')"><span class="ms text-[16px]">fitness_center</span>High Protein</button>
+      <button class="pref-chip flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium transition-all border-2 border-slate-200 bg-white text-slate-700 hover:border-primary hover:bg-primary/10" data-pref="batchCook" onclick="togglePref(this,'batchCook')"><span class="ms text-[16px]">layers</span>Batch Cook</button>
       <button onclick="clearPlan()" class="ml-auto flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium border-2 border-slate-200 bg-white text-slate-500 hover:border-red-300 hover:text-red-500 transition-all"><span class="ms text-[16px]">delete</span>Clear</button>
     </div>
 
@@ -1084,19 +1085,35 @@ function renderSaved(){
 // PLAN
 function planKey(d,m){ return d+'_'+m; }
 
+var DIET_CATS = ['vegetarian','vegan','meat','fish'];
+
 function poolForMeal(mt){
-  // Apply dietary prefs + vibe filter
+  var dietPrefs = st.prefs.filter(function(p){ return DIET_CATS.indexOf(p)!==-1; });
+  var secPrefs  = st.prefs.filter(function(p){ return DIET_CATS.indexOf(p)===-1; });
+
   var pool = RECIPES.filter(function(r){
     if(r.meal!==mt) return false;
-    // vibe: quick → only quick cat
-    if(st.vibe==='quick' && r.cat.indexOf('quick')===-1) return false;
-    // vibe: minimal/budget → prefer batchCook; fallback to any
-    // prefs
-    if(st.prefs.length===0) return true;
-    for(var p=0;p<st.prefs.length;p++) if(r.cat.indexOf(st.prefs[p])!==-1) return true;
-    return false;
+    // Dietary prefs are a hard gate — recipe must match at least one selected diet type
+    if(dietPrefs.length){
+      var match=false;
+      for(var i=0;i<dietPrefs.length;i++) if(r.cat.indexOf(dietPrefs[i])!==-1){ match=true; break; }
+      if(!match) return false;
+    }
+    // Landing-page vibe (quick) applied only when no plan-page secondary filters are set
+    if(!secPrefs.length && st.vibe==='quick' && r.cat.indexOf('quick')===-1) return false;
+    return true;
   });
   if(!pool.length) pool = RECIPES.filter(function(r){ return r.meal===mt; });
+
+  // Secondary filters (quick, highProtein, batchCook) narrow within the dietary pool
+  // but only when they produce enough results to fill the week
+  if(secPrefs.length){
+    var narrowed = pool.filter(function(r){
+      for(var i=0;i<secPrefs.length;i++) if(r.cat.indexOf(secPrefs[i])!==-1) return true;
+      return false;
+    });
+    if(narrowed.length>=3) pool = narrowed;
+  }
   // Boost score for recipes using myIngredients
   pool = shuffle(pool); // shuffle first so ties are broken randomly
   if(st.myIngredients.length){
