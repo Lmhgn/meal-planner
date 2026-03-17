@@ -1217,7 +1217,7 @@ function renderPlan(){
         html += '<div class="plan-slot bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center min-h-[90px] text-center transition-all"'
           +' data-key="'+key+'" data-day="'+d+'" data-mt="'+mt+'"'
           +' ondragover="dragOver(event,this)" ondragleave="dragLeave(this)" ondrop="dropSlot(event,this)">'
-          +'<span class="text-[11px] text-slate-400 font-medium">'+mt+'<br>—</span></div>';
+          +'<span class="text-[11px] text-slate-400 font-medium pointer-events-none">'+mt+'<br>—</span></div>';
       } else {
         html += '<div class="plan-slot group relative bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-slate-100 cursor-grab active:cursor-grabbing"'
           +' draggable="true" data-key="'+key+'" data-day="'+d+'" data-mt="'+mt+'" data-rid="'+r.id+'"'
