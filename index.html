@@ -42,6 +42,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 .drop-target { outline: 2.5px dashed #4bee2b; outline-offset: -2px; background: #e8fde2 !important; }
 .dragging { opacity: 0.4; transform: scale(0.97); }
 .leftover-badge { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:2px 6px; background:#fef3c7; color:#92400e; border-radius:4px; }
+/* Recipe sidebar */
+#recipe-sidebar { transition: transform 0.3s cubic-bezier(.4,0,.2,1); }
+#recipe-sidebar.open { transform: translateX(0) !important; }
+.sb-tab.active { background: rgba(75,238,43,0.15); color: #132210; border-color: #4bee2b; }
+.sidebar-card:active { opacity: 0.5; transform: scale(0.97); }
 </style>
 </head>
 <body class="bg-bg-light text-slate-900 min-h-screen">
@@ -298,6 +303,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
         <button id="gen-btn" onclick="generatePlan()" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 font-bold rounded-lg hover:bg-slate-50 transition-all text-sm">
           <span class="ms text-[18px]">shuffle</span> Generate Plan
         </button>
+        <button onclick="openSidebar()" class="flex items-center gap-2 px-4 py-2.5 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">
+          <span class="ms text-[18px]">menu_book</span> Recipe Library
+        </button>
       </div>
     </div>
 
@@ -367,6 +375,40 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     <div id="modal-content"></div>
   </div>
 </div>
+
+<!-- RECIPE SIDEBAR -->
+<div id="recipe-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl border-l border-slate-200 z-[150] flex flex-col" style="transform:translateX(100%)">
+  <!-- Header -->
+  <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="ms text-primary text-[22px]">menu_book</span>
+      <h2 class="text-base font-extrabold tracking-tight">Recipe Library</h2>
+    </div>
+    <button onclick="closeSidebar()" class="size-8 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors" title="Close">
+      <span class="ms text-slate-500 text-[20px]">close</span>
+    </button>
+  </div>
+  <!-- Tabs -->
+  <div class="px-3 pt-3 pb-2 flex gap-2 flex-shrink-0">
+    <button id="sb-tab-all" class="sb-tab flex-1 text-xs font-bold py-1.5 rounded-lg border-2 border-transparent text-slate-600 hover:bg-slate-100 transition-colors" onclick="setSbTab('all')">All Recipes</button>
+    <button id="sb-tab-favs" class="sb-tab flex-1 text-xs font-bold py-1.5 rounded-lg border-2 border-transparent text-slate-600 hover:bg-slate-100 transition-colors" onclick="setSbTab('favs')"><span class="ms text-[13px] align-middle text-red-400">favorite</span> Favourites</button>
+  </div>
+  <!-- Search -->
+  <div class="px-3 pb-3 flex-shrink-0">
+    <div class="relative">
+      <span class="ms absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[18px] pointer-events-none">search</span>
+      <input id="sb-search" type="text" placeholder="Name or ingredient…" oninput="renderSidebar()"
+        class="w-full pl-8 pr-3 py-2 text-sm rounded-xl border-2 border-slate-200 bg-slate-50 focus:outline-none focus:border-primary transition-colors"/>
+    </div>
+  </div>
+  <div class="px-3 pb-2 flex-shrink-0 border-b border-slate-100">
+    <p class="text-[10px] text-slate-400 font-medium">Drag a recipe onto a day to add it to your plan.</p>
+  </div>
+  <!-- Recipe list -->
+  <div id="sb-list" class="flex-1 overflow-y-auto px-3 py-3"></div>
+</div>
+<!-- Sidebar backdrop -->
+<div id="sb-backdrop" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm z-[140] hidden" onclick="closeSidebar()"></div>
 
 <!-- TOAST -->
 <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-semibold shadow-xl transition-all duration-300 z-[300] pointer-events-none whitespace-nowrap"></div>
@@ -1223,8 +1265,14 @@ function dropSlot(e, el){
   e.preventDefault();
   el.classList.remove('drop-target');
   var targetKey = el.dataset.key;
-  if(!targetKey || targetKey === _dragKey) return;
-  var fromRid = _dragKey ? st.plan[_dragKey] : null;
+  if(!targetKey) return;
+  // From sidebar: just place the recipe (no swap source)
+  if(_dragKey === null){
+    if(_dragRid){ st.plan[targetKey] = _dragRid; persist(); renderPlan(); toast('Recipe added!'); }
+    return;
+  }
+  if(targetKey === _dragKey) return;
+  var fromRid = st.plan[_dragKey];
   var toRid   = st.plan[targetKey];
   // Swap
   if(fromRid) st.plan[targetKey] = fromRid; else delete st.plan[targetKey];
@@ -1232,6 +1280,81 @@ function dropSlot(e, el){
   // Clear leftover markers for swapped slots — user manually moved them
   if(st.leftovers){ delete st.leftovers[_dragKey]; delete st.leftovers[targetKey]; }
   persist(); renderPlan(); toast('Meals swapped!');
+}
+
+// ─── RECIPE SIDEBAR ──────────────────────────────────────────────────────────
+var _sbTab = 'all';
+
+function openSidebar(){
+  document.getElementById('recipe-sidebar').classList.add('open');
+  document.getElementById('sb-backdrop').classList.remove('hidden');
+  setSbTab(_sbTab);
+}
+function closeSidebar(){
+  document.getElementById('recipe-sidebar').classList.remove('open');
+  document.getElementById('sb-backdrop').classList.add('hidden');
+}
+function setSbTab(tab){
+  _sbTab = tab;
+  document.getElementById('sb-tab-all').classList.toggle('active', tab==='all');
+  document.getElementById('sb-tab-favs').classList.toggle('active', tab==='favs');
+  renderSidebar();
+}
+function renderSidebar(){
+  var query = (document.getElementById('sb-search').value||'').toLowerCase().trim();
+  var pool = RECIPES.slice();
+  if(_sbTab === 'favs') pool = pool.filter(function(r){ return isFav(r.id); });
+  if(query){
+    pool = pool.filter(function(r){
+      if(r.name.toLowerCase().indexOf(query) !== -1) return true;
+      return r.ings.some(function(ing){ return ing.n.toLowerCase().indexOf(query) !== -1; });
+    });
+  }
+  // Group by meal type
+  var order = ['breakfast','lunch','dinner','snack'];
+  var sections = {};
+  pool.forEach(function(r){ if(!sections[r.meal]) sections[r.meal]=[]; sections[r.meal].push(r); });
+  var html = '';
+  order.forEach(function(meal){
+    if(!sections[meal]) return;
+    html += '<div class="mb-5">'
+      +'<div class="flex items-center gap-2 mb-2 px-1">'
+      +'<span class="text-[10px] font-black uppercase tracking-widest text-slate-400">'+meal+'</span>'
+      +'<span class="flex-1 h-px bg-slate-100"></span>'
+      +'<span class="text-[10px] text-slate-400">'+sections[meal].length+'</span>'
+      +'</div>';
+    sections[meal].forEach(function(r){
+      var favDot = isFav(r.id) ? '<span class="ms ms-fill text-[11px] text-red-400 absolute top-1.5 right-1.5">favorite</span>' : '';
+      html += '<div class="sidebar-card relative flex items-center gap-2.5 p-2.5 rounded-xl border-2 border-slate-100 bg-white hover:border-primary/40 hover:shadow-sm transition-all cursor-grab active:cursor-grabbing mb-2 select-none"'
+        +' draggable="true" data-rid="'+r.id+'"'
+        +' ondragstart="dragStartSidebar(event,this)" ondragend="dragEndSidebar(this)">'
+        +favDot
+        +'<span class="text-[26px] leading-none flex-shrink-0">'+r.emoji+'</span>'
+        +'<div class="flex-1 min-w-0">'
+        +'<p class="text-xs font-bold text-slate-900 leading-snug truncate">'+r.name+'</p>'
+        +'<p class="text-[10px] text-slate-500 mt-0.5">'+r.cook+' min cook</p>'
+        +'</div>'
+        +'<span class="ms text-slate-300 text-[18px] flex-shrink-0">drag_indicator</span>'
+        +'</div>';
+    });
+    html += '</div>';
+  });
+  if(!html){
+    var msg = _sbTab==='favs' ? 'No favourites yet.<br>Save recipes to find them here.' : 'No recipes match your search.';
+    html = '<div class="text-center text-slate-400 text-sm py-10 leading-relaxed">'+msg+'</div>';
+  }
+  document.getElementById('sb-list').innerHTML = html;
+}
+function dragStartSidebar(e, el){
+  _dragKey = null;
+  _dragRid = el.dataset.rid;
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setData('text/plain', 'sidebar:'+_dragRid);
+  setTimeout(function(){ el.classList.add('dragging'); }, 0);
+}
+function dragEndSidebar(el){
+  el.classList.remove('dragging');
+  document.querySelectorAll('.plan-slot').forEach(function(s){ s.classList.remove('drop-target'); });
 }
 
 // ─── QUANTITY HELPERS ────────────────────────────────────────────────────────
