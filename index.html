@@ -59,10 +59,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
         <span class="text-xl font-bold tracking-tight">Chefly</span>
       </div>
       <nav class="hidden md:flex items-center gap-8">
-        <button class="text-sm font-semibold hover:text-primary transition-colors" onclick="showPage('home')">Recipes</button>
-        <button class="text-sm font-semibold hover:text-primary transition-colors" onclick="showPage('plan')">Plans</button>
-        <button class="text-sm font-semibold hover:text-primary transition-colors" onclick="showPage('shop')">Grocery</button>
-        <button class="text-sm font-semibold hover:text-primary transition-colors" onclick="showPage('saved')">Saved</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="landing" onclick="showPage('landing')">Generate</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="home" onclick="showPage('home')">Recipes</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="plan" onclick="showPage('plan')">Plans</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="shop" onclick="showPage('shop')">Grocery</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="saved" onclick="showPage('saved')">Saved</button>
       </nav>
       <div class="size-10 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center">
         <span class="ms text-slate-600">person</span>
@@ -367,27 +368,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
   </div>
 </div>
 
-<!-- BOTTOM NAV (mobile) -->
-<nav id="bottom-nav" style="display:none" class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-primary/10 flex justify-around items-center py-2 z-50">
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="landing" onclick="showPage('landing')">
-    <span class="ms text-[24px]">auto_awesome</span><span class="text-[10px] font-bold">Generate</span>
-  </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="home" onclick="showPage('home')">
-    <span class="ms text-[24px]">home</span><span class="text-[10px] font-bold">Recipes</span>
-  </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="plan" onclick="showPage('plan')">
-    <span class="ms text-[24px]">calendar_month</span><span class="text-[10px] font-bold">Plan</span>
-  </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="shop" onclick="showPage('shop')">
-    <span class="ms text-[24px]">shopping_cart</span><span class="text-[10px] font-bold">Shop</span>
-  </button>
-  <button class="bnav flex flex-col items-center gap-0.5 text-slate-400 px-3 py-1" data-page="saved" onclick="showPage('saved')">
-    <span class="ms text-[24px]">favorite</span><span class="text-[10px] font-bold">Saved</span>
-  </button>
-</nav>
-
 <!-- TOAST -->
-<div id="toast" class="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-semibold shadow-xl transition-all duration-300 z-[300] pointer-events-none whitespace-nowrap"></div>
+<div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-semibold shadow-xl transition-all duration-300 z-[300] pointer-events-none whitespace-nowrap"></div>
 
 <script>
 var RECIPES = [
@@ -901,13 +883,12 @@ function showPage(page){
   document.getElementById('page-'+page).classList.add('active');
 
   document.getElementById('main-header').style.display = '';
-  document.getElementById('bottom-nav').style.display = '';
 
-  var tabs = document.querySelectorAll('.nav-tab, .bnav');
+  var tabs = document.querySelectorAll('.nav-tab');
   for(var i=0;i<tabs.length;i++){
     var isActive = tabs[i].dataset.page === page;
     tabs[i].classList.toggle('text-primary', isActive);
-    tabs[i].classList.toggle('bg-primary/10', isActive && tabs[i].classList.contains('nav-tab'));
+    tabs[i].classList.toggle('bg-primary/10', isActive);
     tabs[i].classList.toggle('text-slate-500', !isActive);
   }
   if(page==='shop') renderShop();
