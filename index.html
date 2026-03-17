@@ -924,7 +924,7 @@ function showPage(page){
   for(var i=0;i<pages.length;i++) pages[i].classList.remove('active');
   document.getElementById('page-'+page).classList.add('active');
 
-  document.getElementById('main-header').style.display = '';
+  document.getElementById('main-header').style.display = page === 'landing' ? 'none' : '';
 
   var tabs = document.querySelectorAll('.nav-tab');
   for(var i=0;i<tabs.length;i++){
@@ -1051,7 +1051,7 @@ function toggleFav(id){
   var idx = st.favourites.indexOf(id);
   if(idx===-1){ st.favourites.push(id); toast('Recipe saved!'); }
   else { st.favourites.splice(idx,1); toast('Removed from saved'); }
-  persist(); updateFavBadge(); renderGrids(); renderSaved();
+  persist(); updateFavBadge(); renderGrids(); renderSaved(); renderLandingFavs();
   if(openRecipeId===id) updateModalFavBtn();
 }
 
