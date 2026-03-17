@@ -64,11 +64,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
         <span class="text-xl font-bold tracking-tight">Chefly</span>
       </div>
       <nav class="hidden md:flex items-center gap-8">
-        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="landing" onclick="showPage('landing')">Generate</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="landing" onclick="showPage('landing')">Generate Plan</button>
         <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="home" onclick="showPage('home')">Recipes</button>
-        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="plan" onclick="showPage('plan')">Plans</button>
-        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="shop" onclick="showPage('shop')">Grocery</button>
-        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="saved" onclick="showPage('saved')">Saved</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="plan" onclick="showPage('plan')">Meal Plan</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="shop" onclick="showPage('shop')">Shopping List</button>
+        <button class="nav-tab text-sm font-semibold hover:text-primary transition-colors" data-page="saved" onclick="showPage('saved')">Saved Recipes</button>
       </nav>
       <div class="size-10 rounded-full border-2 border-primary bg-primary/10 flex items-center justify-center">
         <span class="ms text-slate-600">person</span>
@@ -202,12 +202,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     <span class="text-lg font-extrabold tracking-tight">Chefly</span>
   </div>
   <nav class="hidden md:flex items-center gap-1">
-    <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="landing" onclick="showPage('landing')">Generate</button>
+    <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="landing" onclick="showPage('landing')">Generate Plan</button>
     <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="home" onclick="showPage('home')">Recipes</button>
     <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="plan" onclick="showPage('plan')">Meal Plan</button>
-    <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="shop" onclick="showPage('shop')">Shopping</button>
+    <button class="nav-tab px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="shop" onclick="showPage('shop')">Shopping List</button>
     <button class="nav-tab relative px-4 py-2 rounded-lg text-sm font-semibold transition-colors" data-page="saved" onclick="showPage('saved')">
-      Saved
+      Saved Recipes
       <span id="fav-badge" class="hidden absolute -top-1 -right-1 bg-primary text-bg-dark text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">0</span>
     </button>
   </nav>
@@ -1352,16 +1352,17 @@ function dragStartSidebar(e, el){
   e.dataTransfer.setData('text/plain', 'sidebar:'+_dragRid);
   setTimeout(function(){
     el.classList.add('dragging');
-    // Let drag events pass through the backdrop so calendar slots receive them
+    // Hide the backdrop entirely during drag so calendar slots can receive drop events
+    // (backdrop-blur creates a compositing layer that blocks drag events even with pointer-events:none)
     var bd = document.getElementById('sb-backdrop');
-    if(bd) bd.style.pointerEvents = 'none';
+    if(bd) bd.classList.add('hidden');
   }, 0);
 }
 function dragEndSidebar(el){
   el.classList.remove('dragging');
   document.querySelectorAll('.plan-slot').forEach(function(s){ s.classList.remove('drop-target'); });
   var bd = document.getElementById('sb-backdrop');
-  if(bd) bd.style.pointerEvents = '';
+  if(bd) bd.classList.remove('hidden');
 }
 
 // ─── QUANTITY HELPERS ────────────────────────────────────────────────────────
