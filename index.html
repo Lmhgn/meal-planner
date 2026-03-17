@@ -1469,6 +1469,29 @@ function buildShopList(){
       });
     });
   });
+  // Consolidate same-named items that appear in different categories
+  // (e.g. 'eggs' in Dairy from one recipe, 'eggs' in Produce from another)
+  var seen = {}; // normalised name -> { cat, item }
+  Object.keys(cats).forEach(function(cat){
+    Object.keys(cats[cat]).slice().forEach(function(item){
+      var norm = item.toLowerCase().replace(/s$/, ''); // simple singular form
+      if(seen[norm]){
+        var ref = seen[norm];
+        // Merge quantities and recipe credits into the first-seen entry
+        cats[ref.cat][ref.item].qtys = cats[ref.cat][ref.item].qtys.concat(cats[cat][item].qtys);
+        cats[cat][item].recipes.forEach(function(r){
+          if(cats[ref.cat][ref.item].recipes.indexOf(r) === -1)
+            cats[ref.cat][ref.item].recipes.push(r);
+        });
+        delete cats[cat][item];
+      } else {
+        seen[norm] = { cat: cat, item: item };
+      }
+    });
+    // Remove category if now empty
+    if(!Object.keys(cats[cat]).length) delete cats[cat];
+  });
+
   return {cats:cats, recipes:recipes, ridCount:ridCount};
 }
 
